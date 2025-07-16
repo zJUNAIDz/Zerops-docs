@@ -1,0 +1,37 @@
+---
+title: Customise Bun runtime environment
+description: Learn how you can customise your Bun runtime environment on Zerops.
+---
+
+import data from '@site/static/data.json'
+import { SetVar } from '@site/src/components/content/var';
+import CustomizeRuntimeContent from '@site/src/components/content/customize-runtime.mdx';
+
+<SetVar name="serviceDisplay" value="Bun" />
+<SetVar name="serviceVersion" value={data.bun.base[0][0]} />
+<SetVar name="servicePath" value="bun" />
+<SetVar name="packageManager" value="bun" />
+<SetVar name="codeLanguage" value="yaml" />
+<SetVar name="defaultEnvironment" value="Bun runtime and Git" />
+<SetVar name="customReasons" value={[
+  '<strong>System packages for processing</strong>: When your app processes images, videos, or files (requiring packages like <code>sudo apk add imagemagick</code>)',
+  '<strong>Global Bun tools</strong>: When you need CLI tools or utilities available system-wide',
+  '<strong>Native dependencies</strong>: When your Bun packages require system libraries that aren\'t in the default environment',
+  '<strong>Different base OS</strong>: When you need Ubuntu instead of Alpine for specific compatibility requirements'
+]} />
+<SetVar name="basicSetupCode" value={`run:
+  os: ubuntu
+  base: {{serviceVersion}}
+  prepareCommands:
+    - sudo apt-get update
+    - sudo apt-get install -y imagemagick
+    - bun add -g some-package`} />
+<SetVar name="buildFilesCode" value={`build:
+  addToRunPrepare:
+    - package.json
+run:
+  prepareCommands:
+    - sudo apk add imagemagick
+    - bun install -g some-package`} />
+
+<CustomizeRuntimeContent />

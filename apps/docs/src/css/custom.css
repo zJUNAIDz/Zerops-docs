@@ -13,8 +13,8 @@
 
 @layer components {
   .sidebar-title {
-    @apply !m-0 !py-1 !px-0;
-    @apply lg:first:top-0 lg:[&:not(:first-child)]:top-[20px];
+    @apply !py-0.5 mt-1 m-0 md:mb-1 !px-1;
+    @apply lg:first:top-0 lg:[&:not(:first-child)]:top-[20px] bg-medusa-bg-subtle rounded-md;
   }
 
   .sidebar-title .menu__link {
@@ -53,7 +53,7 @@
     @apply cursor-default;
   }
 
-  .sidebar-group-headline > .menu__list-item-collapsible > .menu__link:hover,
+  .sidebar-group-headline > .menu__list-item-collapsible > .menu__link:not([href]) > .menu__link:hover,
   .sidebar-group-headline .menu__list-item-collapsible:hover {
     @apply !bg-transparent;
   }
@@ -73,12 +73,12 @@
   }
 
   .sidebar-back-link {
-    @apply cursor-pointer lg:top-0;
+    @apply lg:sticky bg-[#EDEFF3] dark:bg-[#18181A] cursor-pointer lg:top-0 pb-[10px] md:pb-[20px];
   }
 
   .sidebar-back-link,
   .sidebar-title {
-    @apply lg:sticky  lg:z-[100];
+    @apply md:pb-[10px] lg:z-[100];
   }
 
   .sidebar-back-link .menu__link {
@@ -112,7 +112,7 @@
   }
 
   .code-header {
-    @apply py-0.75 px-1 bg-medusa-code-bg-header text-medusa-code-text-subtle;
+    @apply py-0.75 px-1 bg-medusa-code-bg-header text-medusa-code-text-subtle text-[#a4a4b2];
     @apply flex justify-between items-center;
     @apply rounded-tl rounded-tr rounded-br-none rounded-bl-none border-b-0;
     @apply border border-solid border-medusa-code-border border-b-0;
@@ -137,7 +137,11 @@
 }
 
 :root {
-  --docsearch-primary-color: var(--ifm-color-primary) !important;
+  --docsearch-primary-color: #5f7cb4 !important;
+}
+
+html[data-theme='dark'] {
+  --docsearch-primary-color: #213b6e !important;
 }
 
 .docsearch-modal-container {
@@ -173,6 +177,25 @@
   height: 20px;
 }
 
+.height-100 {
+    height: 100%;
+}
+
+.sidebar-group-headline > .menu__list-item-collapsible > .menu__link {
+    padding: 0px !important;
+    color: var(--ifm-menu-color);
+}
+
+.theme-doc-sidebar-item-category-level-1.sidebar-group-headline {
+    margin-bottom: 6px;
+    margin-top: 4px !important;
+}
+
+.sidebar-group-headline > .menu__list-item-collapsible {
+    cursor: default;
+    color: #fff;
+}
+
 html[data-theme='dark'] .docsearch-btn {
   background: #27282d !important;
   color: rgba(82, 82, 91, 1) !important;
@@ -182,6 +205,10 @@ html[data-theme='dark'] .docsearch-btn {
 html[data-theme='dark'] .docsearch-btn:hover {
   background: rgba(53, 55, 60, 1) !important;
   color: rgba(82, 82, 91, 1) !important;
+}
+
+[data-theme='dark'] .alert--warning {
+  background-color: rgba(69, 23, 27, 0.4);
 }
 
 @layer utilities {

@@ -1,0 +1,483 @@
+---
+title: Zerops YAML Configuration
+description: Learn how you can configure your Zerops.yaml and use the available parameters.
+---
+
+import data from '@site/static/data.json';
+import UnorderedCodeList from 'docs/src/components/UnorderedCodeList';
+import Badge from 'docs/src/components/Badge';
+import GroupCards from '@site/src/components/GroupCards';
+
+export const languages = [
+    { name: "Node.js", link: "/nodejs/how-to/build-pipeline" },
+    { name: "PHP", link: "/php/how-to/build-pipeline" },
+    { name: "Python", link: "/python/how-to/build-pipeline" },
+    { name: "Go", link: "/go/how-to/build-pipeline" },
+    { name: ".NET", link: "/dotnet/how-to/build-pipeline" },
+    { name: "Rust", link: "/rust/how-to/build-pipeline" },
+    { name: "Java", link: "/java/how-to/build-pipeline" },
+    { name: "Deno", link: "/deno/how-to/build-pipeline" },
+    { name: "Bun", link: "/bun/how-to/build-pipeline" },
+    { name: "Elixir", link: "/elixir/how-to/build-pipeline" },
+    { name: "Gleam", link: "/gleam/how-to/build-pipeline" },
+    { name: "Nginx", link: "/nginx/how-to/build-pipeline" }
+]
+
+The `zerops.yaml` file is crucial for defining how Zerops should [build and deploy](/features/pipeline) your application.
+Add the `zerops.yaml` file to the **root of your repository** and customize it to suit your application's needs.
+
+---
+
+<GroupCards emoji="🙌" heading="Quick Links to Runtime-Specific Guides" items={languages} />
+
+## Basic Structure
+
+```yaml title="zerops.yaml"
+zerops:
+  - setup: <service_name>
+    build: ...
+    run: ...
+```
+
+- The top-level element is always `zerops`.
+- `setup` contains the **hostname** of your service (must exist in Zerops).
+- Multiple services can be defined in a single `zerops.yaml` (useful for monorepos):
+
+```yaml
+zerops:
+  - setup: app
+    build: ...
+    run: ...
+
+  - setup: api
+    build: ...
+    run: ...
+```
+
+Each service configuration requires `build` and `run` sections. An optional `deploy` section can be added for readiness checks.
+
+## Service Inheritance
+
+### extends <Badge type="optional" />
+
+The `extends` key allows you to inherit configuration from another service defined in the same `zerops.yaml` file. This is useful for creating environment-specific configurations while maintaining a common base.
+
+```yaml
+zerops:
+  - setup: base
+    build:
+      buildCommands:
+        - echo "hello"
+      deployFiles: ./
+    run:
+      start: server run
+
+  - setup: prod
+    extends: base
+    run:
+      crontab:
+        - command: xyz
+          allContainers: false
+          timing: "* * * * *"
+
+  - setup: dev
+    extends: base
+    run:
+      crontab:
+        - command: different command
+          allContainers: false
+          timing: "* * * * *"
+```
+
+When using `extends`:
+- The `extends` value must refer to another service's `setup` value in the same file
+- The child service inherits all configuration from the base service
+- Configuration is merged at the section level (`build`, `run`, `deploy`)
+- You can override specific sections by redefining them
+
+:::tip
+Create a base service with common configuration and extend it for environment-specific services to keep your `zerops.yaml` file DRY (Don't Repeat Yourself).
+:::
+
+## Build Configuration
+
+### base <Badge type="required" />
+
+Sets the base technology for the build environment. [See available options](/zerops-yaml/base-list).
+
+```yaml
+build:
+  base: nodejs@latest
+```
+
+You can specify multiple technologies:
+
+```yaml
+build:
+  base:
+    - nodejs@latest
+  prepareCommands:
+    - zsc add python@3.9
+```
+
+### os <Badge type="optional" />
+
+Sets the operating system for the build environment. Options:
+
+- `alpine` (default)
+- `ubuntu`
+
+Current versions:
+
+- {data.alpine.default}
+- {data.ubuntu.default}
+
+```yaml
+build:
+  os: ubuntu
+```
+
+### prepareCommands <Badge type="optional" />
+
+Customizes the build environment by installing additional dependencies or tools.
+
+```yaml
+build:
+  prepareCommands:
+    - sudo apt-get update
+    - sudo apt-get install -y some-package
+```
+
+### buildCommands <Badge type="required" />
+
+Defines the commands to build your application.
+
+```yaml
+build:
+  buildCommands:
+    - npm install
+    - npm run build
+```
+
+#### Running commands in a single shell instance:
+
+```yaml
+buildCommands:
+  - |
+    npm install
+    npm run build
+```
+
+### deployFiles <Badge type="required" />
+
+Specifies which files or folders to deploy after a successful build.
+
+```yaml
+build:
+  deployFiles:
+    - dist
+    - package.json
+    - node_modules
+```
+
+The files/folders will be placed into `/var/www` folder in runtime, e.g. `./src/assets/fonts` would result in `/var/www/src/assets/fonts`.
+
+#### Using wildcards:
+
+Zerops supports the `~` character as a wildcard for one or more folders in the path.
+
+Deploys all `file.txt` files that are located in any path that begins with `/path/` and ends with `/to/`.
+
+```yaml
+deployFiles: ./path/~/to/file.txt
+```
+
+By default, `./src/assets/fonts` deploys to `/var/www/src/assets/fonts`, keeping the full path. Adding `~`, like `./src/assets/~fonts`, shortens it to `/var/www/fonts`
+
+#### .deployignore
+
+Add a `.deployignore` file to the root of your project to specify which files and folders Zerops should ignore during deploy. The syntax follows the same pattern format as <a href="https://git-scm.com/docs/gitignore#_pattern_format">`.gitignore`</a>.
+
+To ignore a specific file or directory path, start the pattern with a forward slash (`/`). Without the leading slash, the pattern will match files with that name in any directory.
+
+:::tip
+For consistency, it's recommended to configure both your `.gitignore` and `.deployignore` files with the same patterns.
+:::
+
+Examples:
+
+```yaml title="zerops.yaml"
+zerops:
+  - setup: app
+    build:
+      deployFiles: ./
+```
+
+```text title=".deployignore"
+/src/file.txt
+```
+The example above ignores `file.txt` only in the root src directory.
+```text title=".deployignore"
+src/file.txt
+```
+This example above ignores `file.txt` in ANY directory named `src`, such as:
+- `/src/file.txt`
+- `/folder2/folder3/src/file.txt`
+- `/src/src/file.txt`
+
+:::note
+`.deployignore` file also works with <a href="/references/cli/commands#deploy">`zcli service deploy`</a> command.
+:::
+
+### cache <Badge type="optional" />
+
+Defines which files or folders to cache for subsequent builds.
+
+```yaml
+build:
+  cache: node_modules
+```
+
+For more information, see our detailed [guide on build cache](/features/build-cache), complete with extensive examples.
+
+### envVariables <Badge type="optional" />
+
+Sets environment variables for the build environment.
+
+```yaml
+build:
+  envVariables:
+    DB_NAME: db
+    DB_HOST: db
+    DB_USER: db
+    DB_PASS: ${db_password}
+```
+
+:::info
+The `yamlPreprocessor` option in your project & service import YAML allows you to generate random secret values, passwords, and public/private key pairs. For more information, see the [yamlPreprocessor](/references/import-yaml/pre-processor) page.
+:::
+
+## Runtime Configuration
+
+### base <Badge type="optional" />
+
+Sets the base technology for the runtime environment. If not specified, the current version is maintained.
+
+```yaml
+run:
+  base: nodejs@latest
+```
+
+### os <Badge type="optional" />
+
+Sets the operating system for the runtime environment. Options and versions are the same as for the build environment.
+
+### ports <Badge type="optional" />
+
+Specifies the internal ports on which your application will listen.
+
+```yaml
+run:
+  ports:
+    - port: 8080
+      protocol: TCP # Optional
+      httpSupport: true # Optional
+    - port: 8081
+      ...
+```
+
+Available parameters:
+
+#### port <Badge type="required" />
+Defines the port number on which your application listens. Must be between *10* and *65435*, as ports outside this range are reserved for internal Zerops systems.
+
+#### protocol <Badge type="optional" />
+Specifies the network protocol to use:
+- Allowed values: `TCP` *(default)* or `UDP`
+#### httpSupport <Badge type="optional" />
+Indicates whether the port is running a web server:
+- Default value: `true`
+- Set to `false` if a web server isn't running on the port
+- Only available with TCP protocol
+- Used by Zerops for [public access](/features/access) configuration
+
+### prepareCommands <Badge type="optional" />
+
+Customizes the runtime environment by installing additional dependencies or tools.
+
+### addToRunPrepare <Badge type="optional" />
+
+Defines files or folders to be copied from the build container to the prepare runtime container.
+
+### initCommands <Badge type="optional" />
+
+Defines commands to run each time a new runtime container starts or restarts.
+
+```yaml
+run:
+  initCommands:
+    - rm -rf ./cache
+```
+
+### start <Badge type="required-some"/>
+
+Defines the start command for your application.
+
+```yaml
+run:
+  start: npm start
+```
+
+### startCommands <Badge type="optional" />
+
+Defines start commands 
+
+Unlike `start`, you can define multiple commands that starts their own processes.
+
+```yaml
+run:
+  startCommands:
+    # start the application
+    - command: npm run start:prod
+      name: server
+    # start the replication
+    
+    - command: litestream replicate -config=litestream.yaml
+      name: replication
+      # restore the database on container init
+      initCommands:
+        - litestream restore -if-replica-exists -if-db-not-exists -config=litestream.yaml $DB_NAME
+```
+
+See [start-commands-example](https://github.com/zeropsio/start-commands-example)
+
+### documentRoot <Badge type="optional" />
+
+Customizes the root folder for publicly accessible web server content (available only for webserver runtimes).
+
+### siteConfigPath <Badge type="optional" />
+
+Sets the custom webserver configuration (available only for webserver runtimes).
+
+### envVariables <Badge text="Optional" color="#202e57" />
+
+Defines environment variables for the runtime environment.
+
+```yaml
+    run:
+      base: nodejs@20
+      envVariables:
+        DB_NAME: db
+        DB_HOST: db
+        DB_USER: db
+        DB_PASS: ${db_password}
+```
+
+### healthCheck <Badge type="optional" />
+
+Defines a health check for your application.
+
+```yaml
+run:
+  healthCheck:
+    # HTTP GET method example
+    httpGet:
+      port: 80
+      path: /status
+      host: my-host.zerops
+      scheme: https
+    # OR command-based example
+    exec:
+      command: |
+        curl -s http://localhost:8080/status > /tmp/status
+        grep -q "OK" /tmp/status
+
+    # Common parameters
+    failureTimeout: 60
+    disconnectTimeout: 30
+    recoveryTimeout: 30
+    execPeriod: 10
+```
+
+Available parameters:
+
+#### httpGet <Badge type="optional" />
+Configures the health check to request a local URL using a HTTP GET method.
+
+- **port** <Badge type="required" /> - Defines the port of the HTTP GET request.
+- **path** <Badge type="required" /> - Defines the URL path of the HTTP GET request.
+- **host** <Badge type="optional" /> - The health check is triggered from inside of your runtime container so it uses the localhost (127.0.0.1). If you need to add a host to the request header, specify it in the host attribute.
+- **scheme** <Badge type="optional" /> - The health check is triggered from inside of your runtime container so no https is required. If your application requires a https request, set scheme: `https`.
+
+#### exec <Badge type="optional" />
+Configures the health check to run a local command.
+
+- **command** <Badge type="required" /> - Defines a local command to be run. The command has access to the same environment variables. A single string is required. If you need to run multiple commands create a shell script or, use a multiline format as in the example above.
+
+#### Common parameters <Badge type="optional" />
+The following parameters can be used with either `httpGet` or `exec` health checks:
+- **failureTimeout** - Time in seconds until container fails after consecutive health check failures (reset by success).
+- **disconnectTimeout** - Time in seconds until container is disconnected and becomes publicly unavailable.
+- **recoveryTimeout** - Time in seconds until container is connected and becomes publicly available.
+- **execPeriod** - Time interval in seconds between health check attempts.
+
+:::tip
+Health checks continuously monitor your running application, while readiness checks verify if a new deployment is ready to receive traffic. For readiness checks, see the [readinessCheck section](#readinesscheck-).
+:::
+
+### crontab <Badge type="optional" />
+
+  Defines scheduled commands to run as cron jobs within a service.
+
+  ```yaml
+  run:
+    crontab:
+      - command: "date >> /var/log/cron.log"
+        timing: "0 * * * *"
+  ```
+
+Setup cron jobs. See [examples](/zerops-yaml/cron).
+
+## Deploy Configuration
+
+### readinessCheck <Badge type="optional" />
+
+Defines a readiness check for your application. Requires either `httpGet` object or `exec` object.
+
+```yaml
+deploy:
+  readinessCheck:
+    # HTTP GET method example
+    httpGet:
+      port: 80
+      path: /status
+      host: my-host.zerops
+      scheme: https
+
+    # Common parameters
+    failureTimeout: 60
+    retryPeriod: 10
+```
+
+Readiness checks work similarly to [health checks](#healthcheck-) but are specifically for deployment. They verify if a new deployment is ready to receive traffic.
+
+Available parameters:
+
+#### httpGet and exec
+The `httpGet` and `exec` options work the same way as in [health checks](#healthcheck-). See that section for detailed parameter descriptions.
+
+#### Common parameters <Badge type="optional" />
+The following parameters can be used with either `httpGet` or `exec` readiness checks:
+
+- **failureTimeout** - Time in seconds until container is marked as failed.
+- **retryPeriod** - Time interval in seconds between readiness check attempts (equivalent to `execPeriod` in health checks).
+
+:::tip
+Unlike health checks which run continuously, readiness checks only run during deployments to determine when your application is ready to accept traffic.
+:::
+
+:::note
+For more detailed information on specific configurations, refer to the runtime-specific guides linked at the beginning of this document.
+:::
+
+---

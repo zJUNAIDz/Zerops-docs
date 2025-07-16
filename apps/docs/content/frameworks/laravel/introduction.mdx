@@ -1,0 +1,345 @@
+---
+title: How To Deploy Laravel on Zerops with Apache and PostgreSQL
+---
+
+import DeployButton from '@site/src/components/DeployButton';
+import CustomCard from '@site/src/components/CustomCard';
+import IconLaravel from '@theme/Icon/Laravel';
+
+<CustomCard title="Experience the simplicity of Zerops">
+ Deploy the same Laravel setup as in this tutorial with a single click. All you need is a Zerops account.
+
+  <DeployButton link="laravel-minimal-local" badgeWidth="200" />
+</CustomCard>
+
+## Introduction
+
+In this tutorial, you'll learn how to deploy a Laravel application on Zerops. We'll configure a complete environment using Apache as the web server and PostgreSQL as the database.
+
+By the end of this tutorial, you will:
+- Have a fresh Laravel installation running locally
+- Set up a Zerops project with Apache and PostgreSQL
+- Configure zero-downtime deployment with environment variables
+- Deploy a production-ready Laravel application with Zerops subdomain access
+- Set up secure VPN access to your PostgreSQL database
+
+## Prerequisites
+This tutorial assumes you have:
+* PHP, Composer, git installed locally
+* [Zerops account](https://app.zerops.io/signup)
+* [zcli](/references/cli) tool installed
+
+:::note
+You don't need to install PostgreSQL locally - Zerops VPN lets you connect directly to the remote database for development.
+:::
+
+## Step 1 — Creating a New Laravel Project
+
+Let's start by creating a fresh Laravel project:
+
+```bash
+composer create-project laravel/laravel zerops-laravel
+cd zerops-laravel
+```
+
+Let's verify everything works locally. Start Laravel's development server:
+
+```bash
+php artisan serve
+```
+
+Visit http://localhost:8000 in your browser. You should see Laravel's welcome page.
+
+:::tip
+While we're using Laravel's built-in server for simplicity, you can use any local development setup you prefer (Valet, Sail, XAMPP, etc.).
+:::
+
+If you see the welcome page, great! Your local setup is working correctly.
+
+## Step 2 — Setting Up Your Zerops Project
+
+### Log in to zcli
+
+[Log in](/references/cli#personal-access-tokens) to zcli with your **Personal access token**.
+
+### Create Project Configuration
+
+When you create a project in Zerops, you get a production-grade infrastructure with automated security, load balancing, and SSL management. Each project runs in its own isolated network where services communicate securely using simple hostnames, all accessible through VPN for seamless local development.
+
+Learn more about infrastructure features in documentation section [Project & Services Structure](/features/infrastructure).
+
+#### Project Configuration File
+
+The project configuration defines your infrastructure using YAML. This approach provides clear, reproducible configuration that can be version controlled. Later in this tutorial, we'll also show how to achieve the same using the GUI.
+
+Create a new file in your project root called `zerops-project-import.yaml` with the following content:
+
+```yaml title="zerops-project-import.yaml"
+#yamlPreprocessor=on
+project:
+  name: laravel-zerops
+  tags:
+    - zerops-tutorial # tag for easy filtering (optional)
+
+services:
+  - hostname: app
+    type: php-apache@8.4
+    envSecrets:
+      # yamlPreprocessor feat: generates a random 32 char and stores it
+      APP_KEY: <@generateRandomString(<32>)>
+
+  - hostname: db
+    type: postgresql@16
+    mode: HA  # High Availability mode for robust production setup
+```
+
+:::tip Generate secrets
+The `#yamlPreprocessor=on` directive enables Zerops' [YAML preprocessing](/references/import-yaml/pre-processor) for this import file, allowing us to use dynamic values and built-in functions like `generateRandomString`.
+:::
+
+#### Automatic Resource Management
+
+Zerops features intelligent autoscaling that manages all resources (CPU, RAM, Disk) based on actual usage, automatically scaling up and down to optimize costs while maintaining performance.
+
+In this guide, we'll use default scaling ranges and that's why you won't find resource configurations in the import file. See [current ranges](/php/how-to/scaling#basic-settings) for horizontal and vertical scaling of PHP services.
+
+#### High-Availability Database
+
+In this guide, [enabling HA mode](/postgresql/how-to/scale) creates a database cluster across three physical servers, with all the complexity managed automatically by Zerops.
+
+Through Zerops VPN, you can securely access this database setup directly from your local machine, ensuring your development environment matches production exactly.
+
+#### Import the Project
+Now create the project by running:
+```bash
+zcli project project-import zerops-project-import.yaml
+```
+
+### Alternative: Creating Project via GUI
+
+You can also create and configure your project through the Zerops dashboard:
+
+1. Log into your [Zerops Dashboard](https://app.zerops.io)
+2. Click **Add new project**
+3. Set a project name (e.g., "laravel-zerops") and click **Create project**
+
+Then add the required services:
+
+1. **PHP + Apache Service:**
+   - Click **Add Service** and select **PHP+Apache**
+   - Set hostname to "app"
+   - Keep all other settings as default
+
+2. **PostgreSQL Service:**
+   - Click **Add Service** and select **PostgreSQL**
+   - Set hostname to "db"
+   - Keep all other settings as default
+
+## Step 3 — Configuring Your Application
+
+The [deployment configuration](/zerops-yaml/specification) controls how your application builds and runs. Create a `zerops.yaml` file in your project root:
+
+```yaml title="zerops.yaml"
+zerops:
+  - setup: app
+    build:
+      base:
+        - php@8.4
+      buildCommands:
+        - composer install --ignore-platform-reqs
+      deployFiles: ./
+      cache:
+        - vendor
+        - composer.lock
+    deploy:
+      readinessCheck:
+        httpGet:
+          port: 80
+          path: /up
+    run:
+      base: php-apache@8.4
+      envVariables:
+        APP_NAME: "Laravel Zerops Demo"
+        APP_DEBUG: false
+        APP_ENV: production
+        APP_URL: ${zeropsSubdomain}
+        DB_CONNECTION: pgsql
+        DB_HOST: db
+        DB_PORT: 5432
+        DB_DATABASE: db
+        DB_USERNAME: ${db_user}
+        DB_PASSWORD: ${db_password}
+        LOG_CHANNEL: stack
+        LOG_LEVEL: debug
+        SESSION_DRIVER: database
+
+      initCommands:
+        - php artisan config:cache
+        - php artisan route:cache
+        - php artisan migrate --force --isolated
+        - php artisan optimize
+      healthCheck:
+        httpGet:
+          port: 80
+          path: /up
+```
+
+Let's break down some important parts of this configuration:
+
+### Environment Variables
+
+Zerops automatically generates and securely manages various environment variables. For example, `zeropsSubdomain` provides your application's URL, while database credentials `user` and `password` are variables of the `db` service. It is possible to reference any variable or a service by hostname within your project's private network.
+
+```yaml
+APP_URL: ${zeropsSubdomain}  # Automatically set to your app's Zerops URL
+DB_USERNAME: ${db_user}      # Database credentials auto-injected
+DB_PASSWORD: ${db_password}  # Securely managed by Zerops
+```
+
+Learn more about [environment variables](/frameworks/laravel/env-variables) for Laravel.
+
+### Safe Database Migrations
+```yaml
+php artisan migrate --force --isolated
+```
+
+The `--isolated` flag prevents multiple servers from running migrations simultaneously by using a cache lock, ensuring safe database updates during deployment.
+
+### Health Checks
+
+The health check configuration ensures your application is running correctly:
+```yaml
+    readinessCheck:
+        httpGet:
+          port: 80
+          path: /up
+    ...
+    healthCheck:
+        httpGet:
+          port: 80
+          path: /up
+```
+
+By default, latest version of Laravel responds with a 200 OK status on the `/up` endpoint, so no additional configuration is needed.
+
+## Step 4 — Deploying Your Application
+
+Now comes the exciting part - deploying your application to Zerops!
+
+### Deploying Your Code
+
+Initialize git in your project directory:
+```bash
+git init
+```
+
+:::note
+Git is required to track changes for deployment. You don't need to commit, but initializing git helps Zerops manage the deployment files.
+:::
+
+Push your code to Zerops, select your project and service when prompted:
+```bash
+zcli push
+```
+
+### Monitoring the Deployment
+
+1. Go to the [Zerops Dashboard](https://app.zerops.io)
+2. In the top-left corner, you'll see a circle with **running process** text
+3. Click it to see the build progress overview
+4. Click **Open pipeline detail** button to view the detailed build process
+
+You'll see the deployment progress with timing for each step:
+- Initializing build container
+- Running build commands from zerops.yaml
+- Creating app version and upgrading PHP+Apache service
+
+The entire process usually takes less than a minute to complete.
+
+## Step 5 — Verifying Your Deployment
+
+Once the deployment completes, let's verify everything works:
+
+1. Go to your project's app service
+2. Click on **Public access & internal ports**
+3. Find the **Public Access through zerops.app Subdomain** section
+4. Toggle **Enable Zerops Subdomain Access**
+5. Click the generated URL (e.g., `https://app-xxx.prg1.zerops.app`) to view your application
+
+:::note
+The Zerops subdomain is perfect for testing and development, but for production, you should [set up your own domain](/features/access#public-access-through-your-domain) under **Public Access through Your Domains**.
+:::
+
+### Testing Database Connectivity
+
+Let's create a quick route to test database connectivity. Add this to your `routes/web.php`:
+
+```php
+Route::get('/db-test', function () {
+    session()->save();
+    return 'Current number of active sessions in database: ' . Illuminate\Support\Facades\DB::table('sessions')->count();
+});
+```
+
+Deploy this change:
+```bash
+zcli push
+```
+
+Visit `{your-app-url}/db-test` to verify database connectivity.
+
+## Accessing Your Database Locally
+
+Once your application is deployed, you might want to access the database directly from your local machine. Zerops makes this easy with VPN access.
+
+### Setting up VPN Access
+
+1. Start the VPN connection:
+```bash
+zcli vpn up
+```
+
+2. Select your project when prompted
+3. Try http://app.zerops/ to verify connectivity.
+
+That's it! You now have direct access to all services in your project.
+
+### Connecting to Database
+
+To get your database credentials:
+1. Go to the PostgreSQL service in your project
+2. Click **Access details** button
+3. Here you'll find all connection details including hostname, port, user, and password
+
+Update your local `.env` file with these credentials:
+
+```ini
+DB_CONNECTION=pgsql
+DB_HOST=db.zerops
+DB_PORT=5432
+DB_DATABASE=db
+DB_USERNAME=db
+DB_PASSWORD=[password from Access details]
+```
+
+Now you can use your favorite database management tool or run artisan commands while working with the database in Zerops - no local PostgreSQL installation needed!
+
+## Next Steps
+
+Now that your Laravel application is running on Zerops, consider:
+
+1. Setting up a [custom domain](/features/access#public-access-through-your-domain)
+2. Implementing basic CI/CD pipelines with [GitHub](/references/github-integration) or [GitLab](/references/gitlab-integration) integration
+3. Setting up [object storage](/object-storage/overview)
+
+## Conclusion
+
+Congratulations! 🎉 You've successfully deployed a Laravel application on Zerops with Apache and PostgreSQL. Your application is now running in a production-ready environment with automated builds and deployments.
+
+### Additional Resources
+
+- [Laravel Documentation](https://laravel.com/docs)
+- [Laravel Recipe Repository](https://github.com/zeropsio/recipe-laravel-minimal)
+- [zCLI Documentation](/references/cli)
+
+*Need help? Join our [Discord community](https://discord.gg/zeropsio).*

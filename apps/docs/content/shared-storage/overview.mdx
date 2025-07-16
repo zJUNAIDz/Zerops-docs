@@ -1,1 +1,98 @@
-# Shared storage overview
+---
+title: Shared Storage Overview
+description: Learn about working with Shared Storage with ease on Zerops.
+---
+
+import DocCardList from '@theme/DocCardList';
+import Icons from '@theme/Icon';
+import LargeCardList from '@site/src/components/LargeCardList';
+import LargeCard from '@site/src/components/LargeCard';
+
+# Shared Storage
+
+Zerops provides a fully managed and scaled **Shared Storage** service, which can be mounted to your runtime services. It offers:
+- Persistent file sharing between containers of the same service or different services
+- Standard filesystem operations through a POSIX-compatible interface
+- Built-in high-availability configuration
+
+## Documentation Sections
+
+<DocCardList
+  colSize={4}
+  items={[
+    {
+      type: 'link',
+      href: '/shared-storage/how-to/connect',
+      label: 'Connect to Services',
+      customProps: {
+        icon: Icons['link'],
+        description: 'Connect your Shared Storage to runtime services.',
+      },
+    },
+    {
+      type: 'link',
+      href: '/shared-storage/how-to/use',
+      label: 'Usage & Limitations',
+      customProps: {
+        icon: Icons['chart-bar'],
+        description: 'Learn how to save and access data, along with use cases and technical limits.',
+      },
+    },
+    {
+      type: 'link',
+      href: '/shared-storage/how-to/manage',
+      label: 'Management & Access',
+      customProps: {
+        icon: Icons['tools'],
+        description: 'Access UI components and troubleshoot common issues.',
+      },
+    },
+    {
+      type: 'link',
+      href: '/shared-storage/how-to/backup',
+      label: 'Backups',
+      customProps: {
+        icon: Icons['archive-box'],
+        description: 'Configure automatic backups of your data.',
+      },
+    },
+    {
+      type: 'link',
+      href: '/shared-storage/tech-details',
+      label: 'Technical Details',
+      customProps: {
+        icon: Icons['document-text'],
+        description: 'Explore the technical architecture and deployment options.',
+      },
+    },
+  ]}
+/>
+
+*Need help? Join our [Discord community](https://discord.gg/zeropsio).*
+
+## Popular Guides
+
+<DocCardList
+  colSize={6}
+  items={[
+    {
+      type: 'link',
+      href: '/references/cli',
+      label: 'zCLI',
+      customProps: {
+        icon: Icons['command-line'],
+        description:
+          'Get even more out of Zerops with the zCLI command line tool.',
+      },
+    },
+    {
+      type: 'link',
+      href: '/references/vpn',
+      label: 'Zerops VPN',
+      customProps: {
+        icon: Icons['globe-europe'],
+        description: 'Connect to your services easily with Zerops VPN.',
+      },
+    },
+  ]}
+/>

@@ -1,0 +1,14 @@
+---
+title: Create shared storage service for Deno
+description: Learn how to create shared storage which you can use with your Deno service on Zerops.
+---
+
+import data from '@site/static/data.json';
+import { SetVar } from '/src/components/content/var';
+import SharedStorageContent from '/src/components/content/shared-storage.mdx';
+
+<SetVar name="serviceDisplay" value="Deno" />
+<SetVar name="servicePath" value="deno" />
+<SetVar name="serviceVersion" value={data.deno.import[0][0]} />
+
+<SharedStorageContent />

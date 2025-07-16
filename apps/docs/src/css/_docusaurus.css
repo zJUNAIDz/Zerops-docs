@@ -4,6 +4,10 @@ body {
   @apply h-full;
 }
 
+code {
+  vertical-align: baseline !important;
+}
+
 .cards-grid {
   @apply grid gap-x-1 auto-rows-fr;
 }
@@ -59,7 +63,13 @@ details + p {
 }
 
 .col.toc-wrapper {
-  --ifm-col-width: var(--ifm-toc-width);
+  --ifm-col-width: 220px;
+}
+
+@media (min-width: 1400px) {
+  .col.toc-wrapper {
+    --ifm-col-width: 300px;
+  }
 }
 
 .markdown-doc-wrapper--fluid {
@@ -116,7 +126,7 @@ details + p {
 }
 
 .main-wrapper {
-  @apply max-w-xl mx-auto xl:min-w-xl w-full;
+  @apply max-w-xl mx-auto xl:min-w-xxl w-full;
 }
 
 .theme-doc-breadcrumbs {
@@ -250,7 +260,7 @@ h1 {
 
 h2 {
   @apply !text-h2;
-  line-height: 40px !important;
+  line-height: 30px !important;
 }
 
 h3 {
@@ -312,4 +322,18 @@ td {
   padding: 8px;
   border: 1px solid #b6b9bd;
   @apply bg-[#F2F5F7] dark:bg-[#1B1B1F];
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-loading {
+  background-size: 200% 100%;
+  background-position: 0 0;
 }

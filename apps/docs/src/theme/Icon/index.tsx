@@ -1,8 +1,10 @@
 import {
   AcademicCapSolid,
   Adjustments,
+  ArchiveBox,
   ArrowDownLeftMini,
   ArrowDownTray,
+  ArrowPath,
   ArrowUpRightOnBox,
   ArrowUturnLeft,
   BarsThree,
@@ -20,6 +22,7 @@ import {
   CashSolid,
   Channels,
   ChannelsSolid,
+  ChartBar,
   CheckCircleSolid,
   CheckMini,
   ChevronDoubleLeftMiniSolid,
@@ -39,12 +42,14 @@ import {
   ComputerDesktopSolid,
   CreditCardSolid,
   CubeSolid,
+  CurlyBraces,
   CurrencyDollar,
   CurrencyDollarSolid,
   Discord,
   DocumentText,
   DocumentTextSolid,
   EllipseMiniSolid,
+  Envelope,
   ExclamationCircle,
   ExclamationCircleSolid,
   FlyingBox,
@@ -54,12 +59,14 @@ import {
   GiftSolid,
   GlobeEurope,
   GlobeEuropeSolid,
+  InformationCircle,
   InformationCircleSolid,
   JavascriptEx,
   Key,
   KeySolid,
   LightBulb,
   LightBulbSolid,
+  Link,
   Linkedin,
   MagnifyingGlass,
   Map,
@@ -86,7 +93,9 @@ import {
   StarSolid,
   Stripe,
   Sun,
+  Swatch,
   SwatchSolid,
+  Tag,
   TagSolid,
   Tools,
   ToolsSolid,
@@ -98,7 +107,6 @@ import {
   XMarkMini,
   PhotoSolid,
   ListBullet,
-  Swatch,
   Medusa,
   Heart,
   QuestionMark,
@@ -124,19 +132,41 @@ import IconRust from './Rust';
 import IconJava from './Java';
 import IconPostgresql from './Postgresql';
 import IconMariadb from './Mariadb';
+import IconMeilisearch from './Meilisearch';
 import IconMongodb from './Mongodb';
 import IconElasticsearch from './Elasticsearch';
 import IconKeydb from './Keydb';
 import IconRabbitmq from './Rabbitmq';
 import IconNginx from './Nginx';
 import IconUbuntu from './Ubuntu';
+import IconDeno from './Deno';
+import IconBun from './Bun';
+import IconGleam from './Gleam';
+import IconElixir from './Elixir';
+import IconQdrant from './Qdrant';
+import IconNats from './Nats';
+import IconKafka from './Kafka';
+import IconValkey from './Valkey';
+import IconAlpine from './Alpine';
+import IconFirewall from './Firewall';
+import IconZerops from './Zerops';
+import IconDatabase from './Database';
+import IconCloudOk from './CloudOk';
+import IconGitlab from './Gitlab';
+import IconTypesense from './Typesense';
+import IconDocker from './Docker';
+import IconCurlyBraces from './CurlyBraces';
+import IconCdn from './Cdn';
+import IconClickhouse from './Clickhouse';
 
 export default {
   'academic-cap-solid': AcademicCapSolid,
   adjustments: Adjustments,
   alert: ExclamationCircleSolid,
+  'archive-box': ArchiveBox,
   'arrow-down-left-mini': ArrowDownLeftMini,
   'arrow-down-tray': ArrowDownTray,
+  'arrow-path': ArrowPath,
   'back-arrow': ArrowUturnLeft,
   'bars-three': BarsThree,
   beaker: IconBeaker,
@@ -154,6 +184,7 @@ export default {
   'cash-solid': CashSolid,
   'channels-solid': ChannelsSolid,
   channels: Channels,
+  'chart-bar': ChartBar,
   'check-circle-solid': CheckCircleSolid,
   'check-mini': CheckMini,
   'chevron-double-left-mini-solid': ChevronDoubleLeftMiniSolid,
@@ -181,7 +212,9 @@ export default {
   discord: Discord,
   'document-text': DocumentText,
   'document-text-solid': DocumentTextSolid,
+  docker: IconDocker,
   'ellipse-mini-solid': EllipseMiniSolid,
+  'envelope': Envelope,
   'exclamation-circle-solid': ExclamationCircleSolid,
   'external-link': ArrowUpRightOnBox,
   'flying-box': FlyingBox,
@@ -190,9 +223,12 @@ export default {
   gatsby: Gatsby,
   'gift-solid': GiftSolid,
   'flag-mini': IconFlagMini,
+  'firewall': IconFirewall,
+  gitlab: IconGitlab,
   github: IconGitHub,
   'globe-europe': GlobeEurope,
   'globe-europe-solid': GlobeEuropeSolid,
+  'information-circle': InformationCircle,
   'information-circle-solid': InformationCircleSolid,
   javascript: JavascriptEx,
   key: Key,
@@ -200,6 +236,7 @@ export default {
   'light-bulb': LightBulb,
   'light-bulb-solid': LightBulbSolid,
   'light-mode': Sun,
+  link: Link,
   linkedin: Linkedin,
   'magnifying-glass': MagnifyingGlass,
   map: Map,
@@ -229,6 +266,7 @@ export default {
   'star-solid': StarSolid,
   stripe: Stripe,
   'swatch-solid': SwatchSolid,
+  'tag': Tag,
   'tag-solid': TagSolid,
   tools: Tools,
   'tools-solid': ToolsSolid,
@@ -259,10 +297,27 @@ export default {
   java: IconJava,
   postgresql: IconPostgresql,
   mariadb: IconMariadb,
+  meilisearch: IconMeilisearch,
   mongodb: IconMongodb,
   elasticsearch: IconElasticsearch,
   keydb: IconKeydb,
   rabbitmq: IconRabbitmq,
   nginx: IconNginx,
   ubuntu: IconUbuntu,
+  deno: IconDeno,
+  bun: IconBun,
+  gleam: IconGleam,
+  elixir: IconElixir,
+  qdrant: IconQdrant,
+  nats: IconNats,
+  kafka: IconKafka,
+  valkey: IconValkey,
+  alpine: IconAlpine,
+  zerops: IconZerops,
+  database: IconDatabase,
+  cloudok: IconCloudOk,
+  typesense: IconTypesense,
+  'curly-braces': IconCurlyBraces,
+  cdn: IconCdn,
+  clickhouse: IconClickhouse,
 };

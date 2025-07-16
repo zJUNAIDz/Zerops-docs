@@ -1,0 +1,139 @@
+---
+title: Pricing
+description: Zerops pricing plans and resource costs
+---
+
+Zerops provides a straightforward pricing structure based on your project type and resource usage.
+
+The total cost of deploying an application includes your project's **core package cost** + the **cost of the resources** of the services inside a project. Additional charges may apply for optional features such as dedicated IPv4, extra egress, object storage, extra backup space and extra build time.
+
+:::note Fair Billing Model
+Resources are allocated per service and billed by the minute, though credit is deducted hourly based on actual usage. You're only charged for what you use, calculated down to the minute.
+:::
+
+Need to add credits to your account? Visit our [Top-up & Billing page](/company/payment) for instructions.
+
+## Project Core Plans
+
+Zerops offers two core types to match different needs and budgets. For detailed information on both core types, visit our [Project & Services Structure](/features/infrastructure) page.
+
+### Lightweight Core - Free
+Best for development, testing, and smaller workloads with limited redundancy.
+
+**Included resources:**
+- **Build Time**: 15 hours per month
+- **Backup Storage**: 5 GB
+- **Egress Traffic**: 100 GB per month
+
+### Serious Core - $10 / 30 days
+Optimized for production workloads with high availability and comprehensive failover protection.
+
+**Included resources:**
+- **Build Time**: 150 hours per month
+- **Backup Storage**: 25 GB
+- **Egress Traffic**: 3 TB per month
+
+:::note Storage Limits
+All projects have a technical maximum backup storage limit of **1 TiB**. Usage beyond the free tier allocation (5GB or 25GB) is billed according to the [overage costs](#overage-costs) below.
+:::
+
+## Resource Pricing
+
+Services in Zerops require computing resources that are billed separately from your project core. These resources are allocated per service and billed by the minute based on actual usage, with credits deducted hourly.
+
+<table className="w-full my-1.5">
+  <thead>
+    <tr>
+      <th className="w-fit whitespace-nowrap"><strong>Resource</strong></th>
+      <th className="w-fit whitespace-nowrap"><strong>Price</strong></th>
+      <th className="w-fit"><strong>Description</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><strong>Shared CPU</strong></td>
+      <td className="w-fit whitespace-nowrap"><strong>$0.60</strong> per CPU / 30 days</td>
+      <td className="w-fit">Economical option for most workloads with good performance</td>
+    </tr>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><strong>Dedicated CPU</strong></td>
+      <td className="w-fit whitespace-nowrap"><strong>$6.00</strong> per CPU / 30 days</td>
+      <td className="w-fit">Reserved CPU cores for predictable performance</td>
+    </tr>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><strong>RAM</strong></td>
+      <td className="w-fit whitespace-nowrap"><strong>$0.75</strong> per 0.25 GB / 30 days</td>
+      <td className="w-fit">Memory allocated to your services</td>
+    </tr>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><strong>Disk Space</strong></td>
+      <td className="w-fit whitespace-nowrap"><strong>$0.05</strong> per 0.5 GB / 30 days</td>
+      <td className="w-fit">Storage space for your applications and data</td>
+    </tr>
+  </tbody>
+</table>
+
+## Additional Services
+
+Enhance your deployment with these optional services to meet specific requirements for networking, storage, and data transfer.
+
+<table className="w-full my-1.5">
+  <thead>
+    <tr>
+      <th className="w-fit whitespace-nowrap"><strong>Service</strong></th>
+      <th className="w-fit whitespace-nowrap"><strong>Price</strong></th>
+      <th className="w-fit"><strong>Description</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><strong>Dedicated IPv4</strong></td>
+      <td className="w-fit whitespace-nowrap"><strong>$3.00</strong> per 30 days</td>
+      <td className="w-fit">Exclusive IPv4 address for your project (instead of shared)</td>
+    </tr>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><strong>Object Storage</strong></td>
+      <td className="w-fit whitespace-nowrap"><strong>$0.01</strong> per GB / 30 days</td>
+      <td className="w-fit">Scalable storage for files, backups, and static assets</td>
+    </tr>
+  </tbody>
+</table>
+
+## Overage Costs
+
+When you exceed the resources included in your project core plan, the following charges apply:
+
+<table className="w-full my-1.5">
+  <thead>
+    <tr>
+      <th className="w-fit whitespace-nowrap"><strong>Item</strong></th>
+      <th className="w-fit whitespace-nowrap"><strong>Price</strong></th>
+      <th className="w-fit"><strong>Description</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td className="w-fit whitespace-nowrap"><strong>Extra Egress</strong></td>
+        <td className="w-fit whitespace-nowrap"><strong>$0.02</strong> per GB</td>
+        <td className="w-fit">Data transfer out of your project beyond plan limits</td>
+      </tr>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><strong>Extra Backup Space</strong></td>
+      <td className="w-fit whitespace-nowrap"><strong>$0.50</strong> per 5 GB</td>
+      <td className="w-fit">Additional storage for automatic, encrypted backups</td>
+    </tr>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><strong>Extra Build Time</strong></td>
+      <td className="w-fit whitespace-nowrap"><strong>$0.50</strong> per 15 hours</td>
+      <td className="w-fit">Additional time for building and deploying applications</td>
+    </tr>
+  </tbody>
+</table>
+
+## Pricing Calculator
+
+Use our pricing calculator to estimate your monthly costs based on your specific needs:
+
+import PricingCalculator from "@site/src/components/PricingCalculator"
+
+<PricingCalculator />

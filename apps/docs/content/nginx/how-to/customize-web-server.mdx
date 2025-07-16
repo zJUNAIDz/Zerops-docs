@@ -1,5 +1,6 @@
 ---
 title: Customize web server
+description: Learn how you can customize a web server in nginx on Zerops.
 ---
 
 ## Default Nginx configuration
@@ -25,7 +26,7 @@ server {
 
 The configuration contains 2 variables:
 
-- **`{{.DocumentRoot}}`** is replaced by the <a href="/nginx/how-to/build-pipeline#documentroot">`run.documentRoot`</a> attribute from the `zerops.yml`. If the attribute is not specified, the default value `/var/www` is used.
+- **`{{.DocumentRoot}}`** is replaced by the <a href="/nginx/how-to/build-pipeline#documentroot">`run.documentRoot`</a> attribute from the `zerops.yaml`. If the attribute is not specified, the default value `/var/www` is used.
 
 ## Customize Nginx configuration
 
@@ -35,7 +36,7 @@ Follow these steps to customize the Nginx configuration in Nginx static service:
 
 2. Optionally use following variables:
 
-- **`{{.DocumentRoot}}`** is replaced by the <a href="/nginx/how-to/build-pipeline#documentroot">`run.documentRoot`</a> attribute from the `zerops.yml`. If the attribute is not specified, the default value `/var/www` is used.
+- **`{{.DocumentRoot}}`** is replaced by the <a href="/nginx/how-to/build-pipeline#documentroot">`run.documentRoot`</a> attribute from the `zerops.yaml`. If the attribute is not specified, the default value `/var/www` is used.
 
 Example:
 
@@ -43,7 +44,7 @@ Example:
 root {{.DocumentRoot}};
 ```
 
-- **`{{.Environment.ENV_NAME}}`** is replaced by the [env variable](/nginx/how-to/env-variables) value. The env variable must be either defined in [run.envVariables](/nginx/how-to/build-pipeline#envvariables-1) in `zerops.yml` or set as a [secret](/nginx/how-to/env-variables#set-secret-env-variables-in-zerops-gui) or [generated](/nginx/how-to/env-variables#generated-env-variables) env variable in Zerops GUI.
+- **`{{.Environment.ENV_NAME}}`** is replaced by the [env variable](/nginx/how-to/env-variables) value. The env variable must be either defined in [run.envVariables](/nginx/how-to/build-pipeline#envvariables) in `zerops.yaml` or set as a [secret](/nginx/how-to/env-variables#set-secret-env-variables-in-zerops-gui) or [generated](/nginx/how-to/env-variables#generated-env-variables) env variable in Zerops GUI.
 
 :::caution
 Use the **.tmpl** file extension to make Zerops interpret the file as a template. Zerops will replace the supported variables listed above.
@@ -52,12 +53,12 @@ Use the **.tmpl** file extension to make Zerops interpret the file as a template
 3. Check that your Nginx configuration is consistent with Zerops requirements:
 
 - Do not use IP addresses in the `listen` directive
-- If you use other ports than `:80` in the `listen` directive, add them to the <a href="/nginx/how-to/build-pipeline#ports">`run.ports`</a> in your `zerops.yml` as well.
+- If you use other ports than `:80` in the `listen` directive, add them to the <a href="/nginx/how-to/build-pipeline#ports">`run.ports`</a> in your `zerops.yaml` as well.
 - Do not use the port **:443**. All the incoming `https://` traffic is terminated on the Zerops internal balancer where the SSL certificate is installed and the request is forwarded to your Nginx static service as a **http://** on the port **:80**.
 
-4. Add the <a href="/nginx/how-to/build-pipeline#siteconfigpath">`siteConfigPath`</a> to the run section of your `zerops.yml`
+4. Add the <a href="/nginx/how-to/build-pipeline#siteconfigpath">`siteConfigPath`</a> to the run section of your `zerops.yaml`
 
-```yml
+```yaml
 zerops:
   # define hostname of your service
   - setup: app
@@ -83,3 +84,9 @@ zerops:
 5. Ensure that the <a href="/nginx/how-to/build-pipeline#deployfiles">`build.deployFiles`</a> contains the folder with the `siteConfigPath` or add the path to the Nginx config file to the `deployFiles` list. Zerops will deploy the file to the runtime container(s).
 
 6. [Trigger](/nginx/how-to/trigger-pipeline) the build & deploy pipeline.
+
+### Built-in Prerender.io Support
+
+The default Nginx configuration includes automatic prerender.io support for SEO optimization. When `PRERENDER_TOKEN` is set, Nginx will automatically serve pre-rendered content to search engines and social media crawlers.
+
+See [environment variables](/nginx/how-to/env-variables#prerenderio-support) for configuration details.

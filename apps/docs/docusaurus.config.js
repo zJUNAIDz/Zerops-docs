@@ -11,9 +11,10 @@ const config = {
   url: process.env.URL || "http://localhost:3000",
   baseUrl: "/",
   trailingSlash: false,
-  onBrokenLinks: "ignore",
-  onBrokenMarkdownLinks: "throw",
-  favicon: "img/favicon.ico",
+  onBrokenLinks: "warn",
+  onBrokenAnchors: "warn",
+  onBrokenMarkdownLinks: "warn",
+  favicon: "favicon.ico",
   organizationName: "zerops",
   projectName: "zerops/docs",
   plugins: [
@@ -71,7 +72,7 @@ const config = {
           nodeBorder: "#D1D5DB",
           lineColor: "#11181C",
           fontFamily: "Inter",
-          fontSize: "13px",
+          fontSize: "14.75px",
           tertiaryColor: "#F3F4F6",
           tertiaryBorderColor: "#D1D5DB",
           tertiaryTextColor: "#030712",
@@ -87,7 +88,31 @@ const config = {
     },
     prism: {
       defaultLanguage: "ts",
-      additionalLanguages: ["bash", "json"],
+      additionalLanguages: [
+          "bash",          // For CLI commands
+          "json",          // Already included
+          "php",           // For PHP & Apache/nginx
+          "yaml",          // For config files
+          "sql",           // For PostgreSQL/MariaDB
+          "nginx",         // For nginx configs
+          "go",            // For Go code
+          "java",          // For Java code
+          "python",        // For Python code
+          "rust",          // For Rust code
+          "typescript",    // For Node.js/Deno
+          "javascript",    // For Node.js/Bun
+          "csharp",        // For .NET
+          "elixir",        // For Elixir
+          "ruby",          // Common in web development
+          "toml",          // Common for Rust configs
+          "properties",    // For various config files
+          "groovy",        // For Java-related builds
+          "hcl",           // For infrastructure configs
+          "diff",          // For showing changes
+          "scss",          // For static sites
+          "css",           // For static sites
+          "http",          // For API examples
+      ],
       plugins: ["line-numbers", "show-language"],
       theme: {
         ...prismThemes.vsDark,
@@ -135,8 +160,12 @@ const config = {
     },
     socialLinks: [
       {
+        type: "model",
+        href: "https://docs.zerops.io/llms.txt",
+      },
+      {
         type: "discord",
-        href: "https://discord.gg/invite/WDvCZ54",
+        href: "https://docs.zerops.io/discord",
       },
       {
         type: "twitter",

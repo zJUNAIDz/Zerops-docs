@@ -1,17 +1,19 @@
 ---
-title: Configure PHP build & deploy pipeline
+title: Configure Your PHP build & deploy pipeline
+description: Learn more about how you can configure your php service for build & deploy pipeline.
 ---
 
 import data from '@site/static/data.json';
-import UnorderedCodeList from '@site/src/components/UnorderedCodeList';
+import UnorderedCodeList from 'docs/src/components/UnorderedCodeList';
+
 
 Zerops provides a customizable build and runtime environment for your PHP application.
 
-## Add zerops.yml to your repository
+## Add zerops.yaml to your repository
 
-Start by adding `zerops.yml` file to the **root of your repository** and modify it to fit your application:
+Start by adding `zerops.yaml` file to the **root of your repository** and modify it to fit your application:
 
-```yml
+```yaml
 zerops:
   # define hostname of your service
   - setup: app
@@ -23,10 +25,10 @@ zerops:
       # OPTIONAL. Set the operating system for the build environment.
       # os: ubuntu
 
-      # OPTIONAL. Customise the build environment by installing additional packages
+      # OPTIONAL. Customize the build environment by installing additional packages
       # or tools to the base build environment.
       # prepareCommands:
-      #   - apt-get something
+      #   - sudo apt-get something
       #   - curl something else
 
       # OPTIONAL. Build your application
@@ -48,19 +50,19 @@ zerops:
       # OPTIONAL. Sets the base technology for the runtime environment:
       base: php-apache@latest
 
-      # OPTIONAL. Customise the runtime PHP environment by installing additional
+      # OPTIONAL. Customize the runtime PHP environment by installing additional
       # dependencies to the base PHP runtime environment.
       # prepareCommands:
-      #   - apt-get something
+      #   - sudo apt-get something
       #   - curl something else
 
       # OPTIONAL. Run one or more commands each time a new runtime container
       # is started or restarted. These commands are triggered before
       # your PHP application is started.
-      # init:
+      # initCommands:
       #  - rm -rf ./cache
 
-      # OPTIONAL. Customise the folder that will be used as the root of the publicly
+      # OPTIONAL. Customize the folder that will be used as the root of the publicly
       # accessible web server content. Enter the path relative to the /var/www folder.
       documentRoot: public
 
@@ -74,9 +76,9 @@ The top-level element is always `zerops`.
 ### Setup
 
 The first element `setup` contains the **hostname** of your service. A runtime service with the same hostname must exist in Zerops.
-Zerops supports the definition of multiple runtime services in a single `zerops.yml`. This is useful when you use a monorepo. Just add multiple setup elements in your `zerops.yml`:
+Zerops supports the definition of multiple runtime services in a single `zerops.yaml`. This is useful when you use a monorepo. Just add multiple setup elements in your `zerops.yaml`:
 
-```yml
+```yaml
 zerops:
   # definition for app service
   - setup: app
@@ -99,9 +101,9 @@ _REQUIRED._ Sets the base technology for the build environment.
 
 Following options are available for PHP builds:
 
-<UnorderedCodeList data={data.phpVersions} />
+<UnorderedCodeList data={data.php.base.build} />
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -113,18 +115,17 @@ zerops:
 ```
 
 <p>
-  The base build environment contains {data.alpineCurrentVersion}, the selected
-  major version of PHP, <a href="/references/cli">Zerops command line tool</a>,{' '}
-  `composer`, `git` and `wget`.
+  The base build environment contains {data.alpine.default}, the selected
+  major version of PHP, <a href="/references/cli">Zerops command line tool</a>, `composer`, `git` and `wget`.
 </p>
 
 :::info
-You can change the base environment when you need to. Just simply modify the `zerops.yml` in your repository.
+You can change the base environment when you need to. Just simply modify the `zerops.yaml` in your repository.
 :::
 
 If you need to install more technologies to the build environment, set multiple values as a yaml array. For example:
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -133,13 +134,18 @@ zerops:
       # REQUIRED. Sets the base technology for the build environment:
       base:
         - php-apache@latest
-        - go@latest
+      prepareCommands:
+        - zsc add go@latest
       ...
 ```
 
-See the full list of supported [build base environments](/references/zeropsyml/base-list#php).
+See the full list of supported [build base environments](/zerops-yaml/base-list#runtime-services).
 
-To customise your build environment use the [prepareCommands](/php/how-to/build-pipeline#preparecommands) attribute.
+To customise your build environment use the [prepareCommands](#preparecommands) attribute.
+
+:::note
+Modifying the base technology will invalidate your build cache. See our [Build Cache Documentation](/features/build-cache) for more details about cache invalidation.
+:::
 
 ### os
 
@@ -154,11 +160,15 @@ Default value is `alpine`.
 
 We are currently using following os version:
 
-- <span>{data.alpineCurrentVersion}</span>
-- <span>{data.ubuntuCurrentVersion}</span>
+- <span>{data.alpine.default}</span>
+- <span>{data.ubuntu.default}</span>
 
 :::caution
 The os version is fixed and cannot be customised.
+:::
+
+:::note
+Changing the OS setting will invalidate your build cache. See our [Build Cache Documentation](/features/build-cache) for details about cache behavior.
 :::
 
 ### prepareCommands
@@ -167,14 +177,14 @@ _OPTIONAL._ Customises the build environment by installing additional dependenci
 
 The base build environment contains:
 
-- <span>{data.alpineCurrentVersion}</span>
-- selected version of PHP defined in the [base](/php/how-to/build-pipeline#base) attribute
+- <span>{data.alpine.default}</span>
+- selected version of PHP defined in the [base](#base) attribute
 - [Zerops command line tool](/references/cli)
 - `composer`, `git` and `wget`
 
 To install additional packages or tools add one or more prepare commands:
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -186,7 +196,7 @@ zerops:
       # OPTIONAL. Customise the build environment by installing additional packages
       # or tools to the base build environment.
       prepareCommands:
-        - apt-get something
+        - sudo apt-get something
         - curl something else
       ...
 ```
@@ -199,6 +209,10 @@ When the first build is triggered, Zerops will
 
 The application code is available in the `/var/www` folder in your build container before the prepare commands are triggered. This allows you to use any file from your application code in your prepare commands (e.g. a configuration file).
 
+:::note
+These commands are skipped when using cached environment. Modifying `prepareCommands` will invalidate your build cache. See our [Build Cache Documentation](/features/build-cache) for details about cache invalidation.
+:::
+
 #### Command exit code
 
 If any command fails, it returns an exit code other than 0 and the build is canceled. Read the [build log](/php/how-to/logs#build-log) to troubleshoot the error. If the command ends successfully, it returns the exit code 0 and Zerops triggers the following command. When all prepare commands are finished, your custom build environment is ready for the build phase.
@@ -207,31 +221,11 @@ If any command fails, it returns an exit code other than 0 and the build is canc
 
 You can configure your prepare commands to be run in a single shell instance or multiple shell instances. The format is identical to [build commands](#buildcommands).
 
-#### Cache of your custom build environment
-
-Some packages or tools can take a long time to install. Therefore, Zerops caches your custom build environment after each successful build where the prepare commands were used. When the second or following build is triggered, Zerops will use the build cache from the previous build if both following conditions are met:
-
-1. Content of the base and prepare attributes didn't change from the previous build
-2. The build cache wasn't invalidated in the Zerops GUI.
-
-To invalidate the Zerops build cache go to your service detail in Zerops GUI, choose **Service dashboard & runtime containers** from the left menu and click on the **Open pipeline detail** button. Then click on the **Invalidate build cache** icon.
-
-<p align="center">
-  <img
-    src="/img/screenshots/runtime_clear_build_cache.png"
-    alt="image"
-    width="100%"
-    height="auto"
-  />
-</p>
-
-When the build cache is used, Zerops doesn't run the `prepareCommands` commands and the build of your application is faster.
-
 ### buildCommands
 
 _REQUIRED._ Defines build commands.
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -250,15 +244,15 @@ At least one command is required. Zerops triggers each command in the defined or
 
 Before the build commands are triggered the build container contains:
 
-1. base environment defined by the [base](/php/how-to/build-pipeline#base) attribute
-2. optional customisation of the base environment defined in the [prepareCommands](/php/how-to/build-pipeline#preparecommands) attribute
+1. base environment defined by the [base](#base) attribute
+2. optional customisation of the base environment defined in the [prepareCommands](#preparecommands) attribute
 3. your application code
 
 #### Run build commands as a single shell instance
 
 Use following syntax to run all commands in the same environment context. For example, if one command changes the current directory, the next command continues in that directory. When one command creates an environment variable, the next command can access it.
 
-```yml
+```yaml
 buildCommands:
   - |
     composer install --optimize-autoloader --no-dev
@@ -269,7 +263,7 @@ buildCommands:
 
 When the following syntax is used, each command is triggered in a separate environment context. For example, each shell instance starts in the home directory again. When one command creates an environment variable, it won't be available for the next command.
 
-```yml
+```yaml
 buildCommands:
   - composer install --optimize-autoloader --no-dev
   - php artisan env
@@ -279,18 +273,18 @@ buildCommands:
 
 If any command fails, it returns an exit code other than 0 and the build is canceled. Read the [build log](/php/how-to/logs#build-log) to troubleshoot the error. If the error log doesn't contain any specific error message, try to run your build with the verbose option.
 
-```yml
+```yaml
 buildCommands:
   - composer install -v
 ```
 
-If the command ends successfully, it returns the exit code 0 and Zerops triggers the following command. When all `buildCommands` are finished, the application build is completed and ready for the [deploy](/php/how-to/build-pipeline#deployFiles) phase.
+If the command ends successfully, it returns the exit code 0 and Zerops triggers the following command. When all `buildCommands` are finished, the application build is completed and ready for the deploy phase.
 
 ### deployFiles
 
 _REQUIRED._ Selects which files or folders will be deployed after the build has successfully finished. To filter out specific files or folders, use <a href="#deployignore">`.deployignore`</a> file.
 
-```yml
+```yaml
 # REQUIRED. Select which files / folders to deploy after
 # the build has successfully finished
 deployFiles:
@@ -300,13 +294,15 @@ deployFiles:
 
 Determines files or folders produced by your build, which should be deployed to your runtime service containers.
 
-The path starts from the **root directory** of your project (the location of `zerops.yml`). You must enclose the name in quotes if the folder or the file name contains a space.
+The path starts from the **root directory** of your project (the location of `zerops.yaml`). You must enclose the name in quotes if the folder or the file name contains a space.
+
+The files/folders will be placed into `/var/www` folder in runtime, e.g. `./src/assets/fonts` would result in `/var/www/src/assets/fonts`.
 
 #### Examples
 
 Deploys a folder, and a file from the project root directory:
 
-```yml
+```yaml
 deployFiles:
   - public
   - file.txt
@@ -314,13 +310,13 @@ deployFiles:
 
 Deploys the whole content of the build container:
 
-```yml
+```yaml
 deployFiles: .
 ```
 
 Deploys a folder, and a file in a defined path:
 
-```yml
+```yaml
 deployFiles:
   - ./path/to/file.txt
   - ./path/to/dir/
@@ -332,38 +328,55 @@ Zerops supports the `~` character as a wildcard for one or more folders in the p
 
 Deploys all `file.txt` files that are located in any path that begins with `/path/` and ends with `/to/`
 
-```yml
+```yaml
 deployFiles: ./path/~/to/file.txt
 ```
 
 Deploys all folders that are located in any path that begins with `/path/to/`
 
-```yml
+```yaml
 deployFiles: ./path/to/~/
 ```
 
 Deploys all folders that are located in any path that begins with `/path/` and ends with `/to/`
 
-```yml
+```yaml
 deployFiles: ./path/~/to/
 ```
 
+:::note Example
+By default, `./src/assets/fonts` deploys to `/var/www/src/assets/fonts`, keeping the full path. Adding `~`, like `./src/assets/~fonts`, shortens it to `/var/www/fonts`
+:::
 #### .deployignore
 
-Add a `.deployignore` file to the root of your project and specify which files and folders Zerops should ignore during deploy. The syntax is the same as of a <a href="https://git-scm.com/docs/gitignore#_pattern_format">`.gitignore`</a> file.
+Add a `.deployignore` file to the root of your project to specify which files and folders Zerops should ignore during deploy. The syntax follows the same pattern format as <a href="https://git-scm.com/docs/gitignore#_pattern_format">`.gitignore`</a>.
 
-Example to ignore `src/file.txt` file in deploy:
+To ignore a specific file or directory path, start the pattern with a forward slash (`/`). Without the leading slash, the pattern will match files with that name in any directory.
 
-```jsx title="zerops.yml"
+:::tip
+For consistency, it's recommended to configure both your `.gitignore` and `.deployignore` files with the same patterns.
+:::
+
+Examples:
+
+```yaml title="zerops.yaml"
 zerops:
   - setup: app
     build:
       deployFiles: ./
 ```
 
-```jsx title=".deployignore"
-src / file.txt;
+```text title=".deployignore"
+/src/file.txt
 ```
+The example above ignores `file.txt` only in the root src directory.
+```text title=".deployignore"
+src/file.txt
+```
+This example above ignores `file.txt` in ANY directory named `src`, such as:
+- `/src/file.txt`
+- `/folder2/folder3/src/file.txt`
+- `/src/src/file.txt`
 
 :::note
 `.deployignore` file also works with <a href="/references/cli/commands#deploy">`zcli service deploy`</a> command.
@@ -373,16 +386,17 @@ src / file.txt;
 
 _OPTIONAL._ Defines which files or folders will be cached for the next build.
 
-```yml
+```yaml
 # OPTIONAL. Which files / folders you want to cache for the next build.
 # Next builds will be faster when the cache is used.
-cache: vendor
+cache: file.txt
 ```
 
-By default, Zerops doesn't cache the files in the build container. When the build phase is finished, the files and folders defined in the [deployFiles](#deployfiles) attribute are saved and deployed to your runtime containers. Then, the build container is deleted.
-To speed the second and following build up, cache the files that can be used in the next build. We recommend caching the `vendor` directory.
+The cache attribute helps optimize build times by preserving specified files between builds.
 
 The cache attribute supports the [~ wildcard character](#how-to-use-a-wildcard-in-the-path).
+
+Learn more about the [build cache system](/features/build-cache) in Zerops.
 
 ### envVariables
 
@@ -390,7 +404,7 @@ _OPTIONAL._ Defines the environment variables for the build environment.
 
 Enter one or more env variables in following format:
 
-```yml
+```yaml
 zerops:
   # define hostname of your service
   - setup: app
@@ -419,9 +433,10 @@ If you don't specify the `run.base` attribute, Zerops keeps the current PHP vers
 
 Following options are available for PHP builds:
 
-<UnorderedCodeList data={data.phpVersions} />
+<UnorderedCodeList data={data.php.base.runtime.apache} />
+<UnorderedCodeList data={data.php.base.runtime.nginx} />
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -439,19 +454,17 @@ zerops:
 ```
 
 <p>
-  The base runtime environment contains {data.alpineCurrentVersion}, the
-  selected major version of PHP,{' '}
-  <a href="/references/cli">Zerops command line tool</a> and{' '}
-  `composer`, `git` and `wget`.
+  The base runtime environment contains {data.alpine.default}, the
+  selected major version of PHP, <a href="/references/cli">Zerops command line tool</a> and `composer`, `git` and `wget`.
 </p>
 
 :::info
-You can change the base environment when you need to. Just simply modify the `zerops.yml` in your repository.
+You can change the base environment when you need to. Just simply modify the `zerops.yaml` in your repository.
 :::
 
 If you need to install more technologies to the runtime environment, set multiple values as a yaml array. For example:
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -466,11 +479,12 @@ zerops:
       # OPTIONAL. Sets the base technology for the runtime environment:
       base:
         - php-apache@latest
-        - golang@latest
+      prepareCommands:
+        - zsc add go@latest
       ...
 ```
 
-See the full list of supported [run base environments](/references/zeropsyml/base-list).
+See the full list of supported [run base environments](/zerops-yaml/base-list).
 
 To customise your build environment use the `prepareCommands` attribute.
 
@@ -487,8 +501,8 @@ Default value is `alpine`.
 
 We are currently using following os version:
 
-- <span>{data.alpineCurrentVersion}</span>
-- <span>{data.ubuntuCurrentVersion}</span>
+- <span>{data.alpine.default}</span>
+- <span>{data.ubuntu.default}</span>
 
 :::caution
 The os version is fixed and cannot be customised.
@@ -503,7 +517,7 @@ If no ports are specified, Zerops adds the port TCP 80 automatically.
 :::
 
 :::caution
-If you want the web server to listen on other port(s) than `:80`, you must [customize](/php/how-to/build-pipeline#customize-web-server) your web server configuration as well.
+If you want the web server to listen on other port(s) than `:80`, you must [customize](/php/how-to/customize-web-server) your web server configuration as well.
 :::
 
 Projects in Zerops represent a group of one or more services. Services can be of different types (runtime services, databases, message brokers, object storage, etc.). All services of the same project share a **dedicated private network**. To connect to a service within the same project, just use the service hostname and its internal port.
@@ -516,24 +530,40 @@ Do not use the port **:443**. All the incoming traffic is terminated on the Zero
 
 Each port has following attributes:
 
-| parameter   | description                                                                                                                                                                                                                                                                                                            |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| port        | Defines the port number. You can set any port number between _10_ and _65435_. Ports outside this interval are reserved for internal Zerops systems.                                                                                                                                                                   |
-| protocol    | **Optional.** Defines the protocol. Allowed values are `TCP` or `UDP`. Default value is `TCP`.                                                                                                                                                                                                                         |
-| httpSupport | **Optional.** `httpSupport = true` is the default setting for TCP protocol. Set `httpSupport = false` if a web server isn't running on the port. Zerops uses this information for the configuration of [public access](/features/access). `httpSupport = true` is available only in combination with the TCP protocol. |
+<table className="w-full my-1.5">
+  <thead>
+    <tr>
+      <th className="w-fit"><strong>Parameter</strong></th>
+      <th className="w-fit"><strong>Description</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit">port</td>
+      <td className="w-fit">Defines the port number. You can set any port number between <em>10</em> and <em>65435</em>. Ports outside this interval are reserved for internal Zerops systems.</td>
+    </tr>
+    <tr>
+      <td className="w-fit">protocol</td>
+      <td className="w-fit"><strong>Optional.</strong> Defines the protocol. Allowed values are <code>TCP</code> or <code>UDP</code>. Default value is <code>TCP</code>.</td>
+    </tr>
+    <tr>
+      <td className="w-fit">httpSupport</td>
+      <td className="w-fit"><strong>Optional.</strong> <code>httpSupport = true</code> is the default setting for TCP protocol. Set <code>httpSupport = false</code> if a web server isn't running on the port. Zerops uses this information for the configuration of <a href="/features/access">public access</a>. <code>httpSupport = true</code> is available only in combination with the TCP protocol.</td>
+    </tr>
+  </tbody>
+</table>
 
 ### prepareCommands
 
 _OPTIONAL._ Customises the PHP runtime environment by installing additional dependencies or tools to the runtime base environment.
 
 <p>
-  The base PHP environment contains {data.alpineCurrentVersion}, the selected
-  major version of PHP, <a href="/references/cli">Zerops command line tool</a>{' '}
-  and `composer`, `git` and `wget`. To install
+  The base PHP environment contains {data.alpine.default}, the selected
+  major version of PHP, <a href="/references/cli">Zerops command line tool</a> and `composer`, `git` and `wget`. To install
   additional packages or tools add one or more prepare commands:
 </p>
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -546,7 +576,7 @@ zerops:
       # OPTIONAL. Customise the runtime environment by installing additional packages
       # or tools to the base PHP runtime environment.
       prepareCommands:
-        - apt-get something
+        - sudo apt-get something
         - curl something else
       ...
 ```
@@ -554,7 +584,7 @@ zerops:
 When the first deploy with a defined prepare attribute is triggered, Zerops will
 
 1. create a prepare runtime container
-2. optionally: [copy selected folders or files from your build container](/php/how-to/build-pipeline#copy-folders-or-files-from-your-build-container)
+2. optionally: [copy selected folders or files from your build container](#copy-folders-or-files-from-your-build-container)
 3. run the `prepareCommands` commands in the defined order
 
 #### Command exit code
@@ -568,7 +598,7 @@ Some packages or tools can take a long time to install. Therefore, Zerops caches
 1. Content of the [build.addToRunPrepare](#copy-folders-or-files-from-your-build-container) and `run.prepareCommands` attributes didn't change from the previous deploy
 2. The custom runtime cache wasn't invalidated in the Zerops GUI.
 
-To invalidate the Zerops custom runtime cache go to `yyy`
+To invalidate the Zerops runtime cache go to your service detail in Zerops GUI, choose **Service dashboard & runtime containers** from the left menu and click on the **Open pipeline detail** button. Then click on the **Clear runtime prepare cache** button.
 
 <p align="center">
   <img
@@ -588,40 +618,38 @@ You can configure your prepare commands to be run in a single shell instance or 
 ### Copy folders or files from your build container
 
 <p>
-  The prepare runtime container contains {data.alpineCurrentVersion}, the
-  selected major version of PHP,{' '}
-  <a href="/references/cli">Zerops command line tool</a> and{' '}
-  `composer`, `git` and `wget`.
+  The prepare runtime container contains {data.alpine.default}, the
+  selected major version of PHP, <a href="/references/cli">Zerops command line tool</a> and `composer`, `git` and `wget`.
 </p>
 
 The prepare runtime container does not contain your application code nor the built application. If you need to copy some folders or files from the build container to the runtime container (e.g. a configuration file) use the `addToRunPrepare` attribute in the [build section](#build-pipeline-configuration).
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
     # ==== how to build your application ====
     build:
       ...
-      addToRunPrepare: ./runtime-config.yml
+      addToRunPrepare: ./runtime-config.yaml
 
     # ==== how to run your application ====
     run:
       # OPTIONAL. Customise the runtime environment by installing additional packages
       # or tools to the base PHP runtime environment.
       prepareCommands:
-        - apt-get something
+        - sudo apt-get something
         - curl something else
       ...
 ```
 
-In the example above Zerops will copy the `runtime-config.yml` file from your build container **after the build has finished** into the new **prepare runtime** container. The copied files and folders will be available in the `xxx` folder in the new prepare runtime container before the prepare commands are triggered.
+In the example above Zerops will copy the `runtime-config.yaml` file from your build container **after the build has finished** into the new **prepare runtime** container. The copied files and folders will be available in the `xxx` folder in the new prepare runtime container before the prepare commands are triggered.
 
 ### initCommands
 
 _OPTIONAL._ Defines one or more commands to be run each time a new runtime container is started or a container is restarted.
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -642,9 +670,9 @@ These commands are triggered in the runtime container before your PHP applicatio
 Use init commands to clean or initialise your application cache or similar operations.
 
 :::caution
-The init commands will delay the start of your application each time a new runtime container is started (including the [horizontal scaling](/php/how-to/scaling#horizontal-scaling) or when a runtime container is restarted.
+The init commands will delay the start of your application each time a new runtime container is started (including the horizontal [scaling](/php/how-to/scaling) or when a runtime container is restarted).
 
-Do not use the init commands for customising your runtime environment. Use the [run:prepareCommands](/php/how-to/build-pipeline#preparecommands-1) attribute instead.
+Do not use the init commands for customising your runtime environment. Use the [run:prepareCommands](#preparecommands-1) attribute instead.
 :::
 
 #### Command exit code
@@ -666,7 +694,7 @@ By default, the document root is configured to `/var/www`.
 Customize the folder that will be used as the root of the publicly accessible web server content. Enter the path relative to the `/var/www` folder.
 E.g. `documentRoot: public` will set the web server document root to `/var/www/public`.
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -697,7 +725,7 @@ _OPTIONAL._ Defines the environment variables for the runtime environment.
 
 Enter one or more env variables in following format:
 
-```yml
+```yaml
 zerops:
   # define hostname of your service
   - setup: app
@@ -735,7 +763,7 @@ Following attributes are available:
 
 **Example:**
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -763,13 +791,28 @@ Read more about how the [health check works] in Zerops.
 Configures the health check to run a local command.
 Following attributes are available:
 
-| Parameter   | Description                                                                                                                                                                                                                                                                                                              |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **command** | Defines a local command to be run.<br/>The command has access to the same [environment variables](/php/how-to/create#set-environment-variables) as your PHP application.<br/>A single string is required. If you need to run multiple commands create a shell script or, use a multiline format as in the example below. |
+<table className="w-full my-1.5">
+  <thead>
+    <tr>
+      <th className="w-fit"><strong>Parameter</strong></th>
+      <th className="w-fit"><strong>Description</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit"><strong>command</strong></td>
+      <td className="w-fit">
+        Defines a local command to be run.<br/>
+        The command has access to the same <a href="/php/how-to/create#set-secret-environment-variables">environment variables</a> as your PHP application.<br/>
+        A single string is required. If you need to run multiple commands create a shell script or, use a multiline format as in the example below.
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 **Example:**
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -792,6 +835,28 @@ zerops:
 ```
 
 Read more about how the [health check works] in Zerops.
+
+### crontab
+
+_OPTIONAL._ Defines cron jobs.
+
+Setup cron jobs in the following format:
+
+```yaml
+zerops:
+  # define hostname of your service
+  - setup: app
+
+    # ==== how to run your application ====
+    run:
+      crontab:
+        # REQUIRED. Sets the command to execute:
+        - command: ""
+        # REQUIRED. Sets the interval time to execute:
+          timing: "0 * * * *"
+```
+
+Read more about setting up [cron](/zerops-yaml/cron) in Zerops.
 
 ## Deploy configuration
 
@@ -816,7 +881,7 @@ Following attributes are available:
 
 **Example:**
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app
@@ -843,13 +908,28 @@ Read more about how the [readiness check works](/php/how-to/deploy-process#readi
 Configures the readiness check to run a local command.
 Following attributes are available:
 
-| Parameter   | Description                                                                                                                                                                                                                                                                                                              |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **command** | Defines a local command to be run.<br/>The command has access to the same [environment variables](/php/how-to/create#set-environment-variables) as your PHP application.<br/>A single string is required. If you need to run multiple commands create a shell script or, use a multiline format as in the example below. |
+<table className="w-full my-1.5">
+  <thead>
+    <tr>
+      <th className="w-fit"><strong>Parameter</strong></th>
+      <th className="w-fit"><strong>Description</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit"><strong>command</strong></td>
+      <td className="w-fit">
+        Defines a local command to be run.<br/>
+        The command has access to the same <a href="/php/how-to/create#set-secret-environment-variables">environment variables</a> as your PHP application.<br/>
+        A single string is required. If you need to run multiple commands create a shell script or, use a multiline format as in the example below.
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 **Example:**
 
-```yml
+```yaml
 zerops:
   # hostname of your service
   - setup: app

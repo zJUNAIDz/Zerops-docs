@@ -1,0 +1,95 @@
+/* styles.module.css */
+:root {
+  --tab-button-bg: var(--ifm-color-emphasis-200);
+  --tab-button-hover-bg: var(--ifm-color-emphasis-300);
+  --tab-button-active-bg: var(--ifm-color-emphasis-100);
+  --tab-button-color: var(--ifm-color-emphasis-900);
+  --tab-button-hover-color: var(--ifm-color-emphasis-900);
+  --tab-button-active-color: var(--ifm-color-primary);
+}
+
+[data-theme='dark'] {
+  --tab-button-bg: var(--ifm-color-emphasis-100);
+  --tab-button-hover-bg: var(--docs-bg-subtle-pressed);
+  --tab-button-active-bg: var(--ifm-color-emphasis-200);
+  --tab-button-color: var(--ifm-color-emphasis-900);
+  --tab-button-hover-color: var(--ifm-color-emphasis-900);
+  --tab-button-active-color: var(--ifm-color-primary);
+}
+
+.tabbedCodeContainer {
+  border-radius: 8px;
+}
+
+.tabsHeader {
+  display: inline-flex;
+  background-color: var(--ifm-color-emphasis-200);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tabButton {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  color: var(--tab-button-color);
+  background-color: var(--tab-button-bg);
+  white-space: nowrap;
+}
+
+.tabButton:hover {
+  background-color: var(--tab-button-hover-bg);
+  color: var(--tab-button-hover-color);
+}
+
+.activeTab {
+  color: var(--tab-button-active-color);
+  background-color: var(--tab-button-active-bg);
+  border-bottom: 2px solid var(--ifm-color-primary);
+}
+
+.activeTab:hover {
+  color: var(--tab-button-active-color);
+  background-color: var(--tab-button-active-bg);
+  border-bottom: 2px solid var(--ifm-color-primary);
+}
+
+.codeBlockWrapper {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.loadingMessage, .errorMessage {
+  padding: 1.5rem;
+  background-color: var(--ifm-pre-background);
+  color: var(--ifm-color-emphasis-800);
+}
+
+.errorMessage {
+  color: var(--ifm-color-danger);
+}
+
+.tabbedCodeContainer :global(.code-header) {
+  @apply rounded-tl-none rounded-tr-none border-b-0;
+}
+
+.tabbedCodeContainer :global(.language-yaml) {
+  @apply rounded-tl-none rounded-tr-none border-b-0;
+}
+
+.githubLink {
+  font-size: 0.8rem;
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.githubLink:hover {
+  text-decoration: underline;
+}

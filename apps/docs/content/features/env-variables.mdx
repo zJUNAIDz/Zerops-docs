@@ -1,167 +1,335 @@
 ---
-title: Environment variables
+title: Environment Variables
+description: Learn how to use, manage, and isolate environment variables in Zerops.
 ---
+
 import Image from '/src/components/Image';
 
-Environment variables help you run your application in different environments. They allow you to isolate all specific environment aspects from your application code and keep your app encapsulated. You can create several [projects](/features/infrastructure#project) in Zerops that represent different environments (development, stage, production) or even each developer can have a project with its own environment.
+Zerops manages environment variables at two scopes: service level and project level. These variables are handled automatically without requiring `.env` files.
 
-In Zerops you do not have to create a `.env` file manually. Zerops handles the environment variables for you.
+## Service Variables
 
-## Types of env variables in Zerops
+Variables that are specific to individual [services](/features/infrastructure#services).
 
-There are 3 different sets of env variables in Zerops:
+### User-Defined Variables
 
-| environment | type   | defined in                                                                        |
-| ----------- | ------ | --------------------------------------------------------------------------------- |
-| build       | basic  | [zerops.yml](/nodejs/how-to/build-pipeline#envvariables)                          |
-| runtime     | basic  | [zerops.yml](/nodejs/how-to/build-pipeline#envvariables-1)                        |
-| runtime     | secret | [Zerops GUI](/nodejs/how-to/env-variables#set-secret-env-variables-in-zerops-gui) |
+You can define service-level variables in two ways:
 
-Use the secret env variables for all sensitive data you don't want to store in your application code. Secret env variables are also useful if you need for testing where you need to change the value of some env variables frequently. Secret variables are managed in Zerops GUI and you don't have to redeploy your application.
+#### 1. Build & Runtime Variables
 
-The basic build and runtime env variables are listed in your zerops.yml and deployed together with your application code.
+These variables are defined with `envVariables` attribute in the `build` or `run` section of your [zerops.yaml](/zerops-yaml/specification) file and are accessible within their respective containers.
 
-You can reference another variable of the same service or even a variable of another service within the same project.
+```yaml title="zerops.yaml"
+...
+  build:
+    envVariables:
+      DB_NAME: db
+      DB_HOST: 127.0.0.1
+      DB_USER: db
+      DB_PASS: password
+    ...
+  run:
+    envVariables:
+      DB_NAME: db
+      DB_HOST: 127.0.0.1
+      DB_USER: db
+      DB_PASS: password
+```
 
-## Set secret runtime env variables in Zerops GUI
+See how to [reference variables](#referencing-variables) between services and between build and runtime environments.
 
-Use secret variables to store passwords, tokens and other sensitive information that shouldn't be part of your repository and listed in zerops.yml.
+:::note
+Your application must be redeployed when updating environmental variables in `zerops.yaml`.
+:::
+
+#### 2. Secret Variables
+
+For storing sensitive data you don't want in your source repository. They can be updated without redeployment (though services need to be reloaded).
+
+Secret variables can be managed through:
+
+##### GUI Interface
+
+Navigate to service details and find **Environment variables** in the menu. You can:
+- Add individual variables using the "Add secret variable" button
+- Edit individual variables through the menu that appears on hover
+- Use the bulk editor for managing multiple variables in .env format
 
 <p align="center">
     <Image
-    lightImage="/img/screenshots/runtime_secret_variables.png"
-    darkImage="/img/screenshots/runtime_secret_variables.png"
+    lightImage="/img/screenshots/secret_variables.webp"
+    darkImage="/img/screenshots/secret_variables.webp"
     alt="Runtime Secret Variables"
-    style={{ width: '95%', height: 'auto' }}
-  />
+    />
 </p>
 
-You can set env variables when you create a new runtime service or you can set them later.
+##### Import Configuration
 
-To configure env variables for an existing service, go to the service detail and choose **Environment variables** in the left menu. Scroll to the **Secret variables** section and click on the **Add secret variable** button and set variable key and value.
+Create secret variables for a service with `envSecrets` attribute. See the complete [import.yaml structure](/references/import).
 
-You can edit or delete env variables that you've created by clicking on the menu on the right side of each row.
-
-The changes you've made in the list of env variables need to be committed. Click on the **Commit x changes** button and Zerops will update the env variables in all containers of your project's services.
-
-:::caution
-You need to **restart** the runtime service after you commit the changes in env variables. The runtime process running in the container receives the list env variables only when it starts. Update of the env variables while the runtime process is running does not affect your application.
-:::
-
-## Set basic build env variables in zerops.yml
-
-To set basic env variables for the build environment, add the `envVariables` attribute to the `build` section in your `zerops.yml`.
-
-```yml
-zerops:
-  # define hostname of your service
-  - setup: app
-    # ==== how to build your application ====
-    build:
-       …
-
-      # OPTIONAL. Defines the env variables for the build environment:
-      envVariables:
-        DB_NAME: db
-        DB_HOST: db
-        DB_USER: db
-        DB_PASS: ${db_password}
+```yaml title="import.yaml"
+services:
+  ...
+  envSecrets:
+    S3_ACCESS_KEY_ID: 'your-secret-s3-key'
+    S3_ACCESS_SECRET: 'your-s3-access-secret'
 ```
 
-When you need to update a value of an existing env variable or change the set of build or runtime env variables, update your `zerops.yml` and redeploy your application to Zerops.
+### System-Generated Variables
 
-## Set basic runtime env variables in zerops.yml
+Zerops automatically generates variables based on service type.
 
-To set basic env variables for the runtime environment, add the `envVariables` attribute to the runtime section in your `zerops.yml`.
+These variables cannot be deleted and are always listed at the bottom of the environment variables page. Some are read-only (like `hostname`), while others can be edited (like `PATH`).
 
-```yml
-zerops:
-  # define hostname of your service
-  - setup: app
-    # ==== how to build your application ====
-    run:
-       …
+These variables can also be [referenced](#referencing-variables).
 
-      # OPTIONAL. Defines the env variables for the runtime environment:
-      envVariables:
-        DB_NAME: db
-        DB_HOST: db
-        DB_USER: db
-        DB_PASS: ${db_password}
+## Project Variables
+
+Variables that apply across all services within a [project](/features/infrastructure#projects). These provide a way to share common configuration across services.
+
+They work similarly to service secret variables but at project scope - they're managed through the GUI and can be updated without redeployment (though services need to be reloaded).
+
+### User-Defined Variables
+
+You can set project-wide variables through:
+
+#### GUI Interface
+
+Access **Project environment variables** in your project detail to:
+- Add individual variables one by one
+- Edit individual variables
+- Use the bulk editor with .env format
+
+#### Import Configuration
+
+Create project variables with `envVariables` attribute. See the complete [import.yaml structure](/references/import).
+
+```yaml title="import.yaml"
+project:
+  ...
+  envVariables:
+    LOG_LEVEL: info
+    API_VERSION: v1
 ```
 
-When you need to update a value of an existing env variable or change the set of build or runtime env variables, update your `zerops.yml` and redeploy your application to Zerops.
+### System-Generated Variables
 
-## Env variable restrictions
+Zerops automatically generates project-level variables that can be [referenced](#referencing-variables) from services.
 
-**key**
+## Environment Variable Isolation
 
-- must satisfy the following regular expression: `[a-zA-Z_]+[a-zA-Z0-9_]*`
-- all variable keys in the same service must be unique regardless of case
-- keys are case sensitive
+A security feature that controls the **visibility** of environment variables across services within a project.
 
-**value**
+By default, Zerops isolates environment variables between services to enhance security and prevent unintended access to sensitive information. This isolation can be configured at both project and service levels.
 
-- must contain only ASCII characters
-- the _End of Line_ character is forbidden
+### Isolation Modes
 
-These restrictions apply to all [types of env variables](#types-of-env-variables-in-zerops).
+Zerops supports two isolation modes:
 
-## Referencing other env variables
+<table className="w-full my-1.5">
+  <thead>
+    <tr>
+      <th className="w-fit">Mode</th>
+      <th className="w-fit">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><code>service</code></td>
+      <td className="w-full"><strong>Default mode.</strong> Variables are isolated to their respective services. Services can only access their own variables and must explicitly reference variables from other services.</td>
+    </tr>
+    <tr>
+      <td className="w-fit whitespace-nowrap"><code>none</code></td>
+      <td className="w-full"><i>Legacy mode.</i> All variables from all services are automatically shared and accessible via prefixing.</td>
+    </tr>
+  </tbody>
+</table>
 
-You can reference another variable of the same service using `${key}` in your variable value. You can even reference a variable from a different service using `${hostname_key}`. The referenced variable doesn't need to exist when you are entering your variable.
+### Configuring Isolation
 
-### Reference a local variable in another variable value
+#### Project-Level Isolation
 
-| Variable key | Variable value      | Computed variable value |
-| ------------ | ------------------- | ----------------------- |
-| id           | 12345               | 12345                   |
-| hostname     | app                 | app                     |
-| name         | `${id}-${hostname}` | 12345-app               |
+Zerops automatically creates the `envIsolation` project variable with the default value `service`. You only need to modify this if you want to disable isolation:
 
-### Reference a variable of another project service
+```yaml title="import.yaml"
+project:
+  envIsolation: none  # Disables isolation, sharing all variables
+```
 
-Let's say your project contains two PostgreSQL services `dbtest` and `dbprod`. Both services have a `connectionString` variable. Then you can create a `dbConnectionString` env variable in your application runtime and set `${dbtest_connectionString}` as the variable value. Zerops will fill in the value of the `connectionString` variable of the `dbtest` service.
+This can also be set through the Project Environment Variables section in the GUI.
 
-When you change the `dbConnectionString` value to `${dbprod_connectionString}`, Zerops will fill in the value of the `connectionString` variable of the `dbprod` service.
+#### Service-Level Override
 
-:::caution
-When you change the value of the `connectionString` variable in the service `dbtest` and commit the changes you need to **restart** the runtime service. The runtime process running in the container receives the list env variables only when it starts. Update of the env variables while the runtime process is running does not affect your application.
+Individual services can override the project-level isolation setting:
+
+```yaml title="import.yaml"
+services:
+  - hostname: db
+    envIsolation: none  # This service's variables will be visible to all services
+```
+
+:::tip
+You might set a database service to `envIsolation: none` to expose its connection details to other services, without having to manually reference them, while keeping the rest of your services isolated.
 :::
 
-## Generated env variables
+:::note
+In import YAML, `envIsolation` can also be nested under `envVariables`/`envSecrets`. (If both are present, the nested version takes precedence).
+:::
 
-Zerops creates several helper variables when a runtime service is created, e.g. `hostname`, `PATH`. Some helper variables are read-only (`hostname`), others are editable (`PATH`). Generated variables cannot be deleted.
+### Accessing Variables Across Services
 
-Generated env variables are listed on the **Environment variables** page. Scroll to the **Generated variables** section.
+#### With Isolation Enabled (`service` mode)
 
-## How to read env variables from your application
+When isolation is enabled, you must explicitly create reference variables to access variables from other services:
 
-Choose your runtime:
+```yaml title="zerops.yaml"
+# In the 'app' service:
+run:
+  envVariables:
+    # Create a local reference to the 'password' variable from the 'db' service
+    DB_PASSWORD: ${db_password}
+```
 
-- [Node.js](/nodejs/how-to/env-variables#how-to-read-env-variables-from-your-nodejs-app)
-- [PHP](/php/how-to/env-variables#how-to-read-env-variables-from-your-php-app)
-- [Python](/python/how-to/env-variables#how-to-read-env-variables-from-your-python-app)
-- [Go](/go/how-to/env-variables#how-to-read-env-variables-from-your-go-app)
-- [.NET](/dotnet/how-to/env-variables#how-to-read-env-variables-from-your-dotnet-app)
-- [Rust](/rust/how-to/env-variables#how-to-read-env-variables-from-your-rust-app)
-- [Rust](/rust/how-to/env-variables#how-to-read-env-variables-from-your-rust-app)
+This approach gives you complete control over which variables are shared between services.
 
-## How to read env variables of another service
+#### With Isolation Disabled (`none` mode)
 
-All services of the same project can reference environment variables from other services. To use an environment variable from one service in another service in the same project, you must prefix the environment variable key with the service hostname and underscore.
+When isolation is disabled, variables are automatically available across all services with the service name prefix:
 
-#### Examples:
+```yaml
+# In any service, you can directly access:
+${db_password}  # Accesses the 'password' variable from the 'db' service
+```
 
-To access the `connectionString` env variable of the `mariadb1` service, use `mariadb1_connectionString` as the env variable key.
-To access the `password` env variable of the `mariadb2` service, use `mariadb2_password` as the env variable key.
+### Best Practices for Variable Isolation
 
-## How to read runtime env variables in the build environment
+1. **Use Default Isolation**: Keep the default `service` isolation for enhanced security.
+2. **Explicit References**: Create explicit references only for variables that need to be shared.
+3. **Naming Conventions**: Use clear naming patterns for reference variables (e.g. `DB_PASSWORD` for a reference to `db_password`).
+4. **Service-Level Exceptions**: Use service-level isolation overrides sparingly and only for services that need to expose their variables widely.
 
-You can use runtime env variables in the build environment using the `RUNTIME_` prefix. For example if you have a runtime variable with the `connectionString` key, use the `RUNTIME_connectionString` to read the variable in the build environment. This rule applies both for basic and secret runtime variables.
+## Variable Restrictions
 
-## Basic and secret env variable with the same key
+All environment variables must follow these restrictions:
 
-If you create a secret env variable and a basic runtime env variable with the same key, Zerops saves the basic runtime env variable from your zerops.yml and ignores the secret env variable.
+### Key
+- Alphanumeric characters only (use `_` to separate words)
+- Must be unique within their scope
+- Case-sensitive
 
-If you create a basic build env variable and a runtime env variable with the same key, Zerops saves both because the build and runtime environments have separate sets of env variables.
+### Value
+- ASCII characters only
+- No EOL characters
+
+## Variable Management
+
+### Variable Precedence
+
+When the same environment variable key exists in multiple places, Zerops follows these precedence rules:
+
+1. Service-level variables take precedence over project variables
+2. Within service-level:
+   - Build/runtime variables override secret variables
+   - Build and runtime containers are separate environments
+
+### Referencing Variables
+
+You can reference other variables using the `${variable_name}` syntax:
+
+#### Within Same Service
+```yaml
+envVariables:
+  id: 42069
+  hostname: app
+  name: ${id}-${hostname}  # Results in: 42069-app
+```
+
+#### Across Services
+
+How this works depends on your environment variable isolation setting:
+
+**With Isolation Enabled** (`service` mode - default)
+* Create an explicit reference in the destination service:
+```yaml
+# In the 'app' service
+envVariables:
+  # Creating a reference to the 'connectionString' from 'dbtest' service
+  dbConnection: ${dbtest_connectionString}
+```
+
+**With Isolation Disabled** (`none` mode)
+* Variables from other services are automatically injected into the container and available using the service prefix format `servicename_variablename`:
+```yaml
+# In any container, you can directly access variables from other services:
+# ${dbtest_connectionString}
+```
+
+#### Between Build and Runtime Environments
+
+Build and runtime are two distinct environments in Zerops. Each environment can have its own set of variables, and you can use the same variable names in both environments since they are separate. Due to this separation, variables defined in one are not automatically accessible in the other.
+
+To share variables between environments, you need to use specific prefixes:
+- Use `RUNTIME_` prefix to access runtime variables during build
+- Use `BUILD_` prefix to access build variables during runtime
+
+Here's an example of `zerops.yaml` file showing how to reference a runtime variable during build:
+
+```yaml title="zerops.yaml"
+build:
+  envVariables:
+    API_KEY: ${RUNTIME_API_KEY}  # Using runtime variable during build
+run:
+  envVariables:
+    API_KEY: "12345-abcde"      # Referenced in build with RUNTIME_ prefix
+```
+
+#### Project Variables
+No prefix needed when referencing project variables:
+```yaml title="import.yaml"
+project:
+  ...
+  envVariables:
+    projectName: devel
+```
+
+```yaml title="zerops.yaml"
+envVariables:
+  id: 42069
+  hostname: app
+  name: ${projectName}-${hostname}  # Results in: devel-app
+```
+
+## Environment Variable Examples
+
+### Variable Isolation Example
+
+Consider a project with three services: `api`, `db`, and `cache`:
+
+```yaml title="Project structure"
+project:
+  name: my-project
+services:
+  - hostname: api
+    envSecrets:
+      # Creating explicit references to needed variables
+      DB_CONNECTION: ${db_user}:${db_password}@${db_hostname}:${db_port}
+      CACHE_URL: ${cache_hostname}:${cache_port}
+  - hostname: db
+    envSecrets:
+      password: secureDbPassword
+      user: dbuser
+      port: 5432
+  - hostname: cache
+    envSecrets:
+      password: cacheServerPass
+      port: 6379
+```
+
+With this setup:
+- The `api` service can only access the specific `db` and `cache` variables it explicitly references
+- The `db` service cannot see any variables from `api` or `cache`
+- The `cache` service cannot see any variables from `api` or `db`
+
+If we changed the project's `envIsolation` to `none`, all services would be able to see all variables from all other services (prefixed with the service name).
+
+*Need help? Join our [Discord community](https://discord.gg/zeropsio).*

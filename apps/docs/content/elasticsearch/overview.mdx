@@ -1,1 +1,111 @@
-# Elasticsearch overview
+---
+title: Elasticsearch
+---
+
+import UnorderedList from '@site/src/components/UnorderedList';
+import UnorderedCodeList from '@site/src/components/UnorderedCodeList';
+import data from '@site/static/data.json';
+import ResourceTable from '/src/components/ResourceTable';
+
+Deploy [Elasticsearch](https://www.elastic.co/elasticsearch/) instances in Zerops with flexible scaling options, from standalone nodes to highly available clusters.
+
+## Supported Versions
+
+Currently supported Elasticsearch versions:
+<UnorderedList data={data.elasticsearch.readable}/>
+
+Import configuration version:
+<UnorderedCodeList data={data.elasticsearch.import}/>
+
+
+<ResourceTable resources={{
+  ram: {
+    min: '0.25 GB',
+  }
+}} />
+
+## Connection Details
+
+- **Port**: 9200
+- **Protocol**: HTTP only
+- **Internal Access**: `http://{hostname}:9200`
+
+:::note
+When accessing from another service within the same project, use the service hostname as the connection address.
+:::
+
+## Configuration Options
+
+### Plugin Management
+
+You can configure Elasticsearch plugins using a comma-separated list in your environment secrets:
+
+```yaml
+envSecrets:
+  PLUGINS: "analysis-icu,ingest-attachment"
+```
+
+**Plugin Configuration Details:**
+- Defines plugins to install at service startup
+- **Format**: `plugin1,plugin2,...`
+- Service automatically installs specified plugins during initialization
+- Removing a plugin from this list triggers uninstallation on service restart
+
+### JVM Heap Allocation
+
+Control the JVM heap size as a percentage of container memory:
+
+```yaml
+envSecrets:
+  HEAP_PERCENT: "75"
+```
+
+**Heap Configuration Details:**
+- Value represents the percentage of container memory allocated to JVM heap
+- **Default**: 50% of available container memory
+- **Valid range**: 1-100
+- To increase available memory, adjust the service's RAM allocation in scaling configuration
+
+:::note Requires Restart
+Changes to HEAP_PERCENT require a service restart to take effect.
+:::
+
+## Backup
+
+Elasticsearch backups are created using `elasticdump`:
+
+- **Format**: `.gz` (per index/component dump)
+- **Tooling**: `elasticdump`
+- **Compression**: Gzip compressed JSON data
+
+For backup configuration, scheduling, retention policies, and management options, see the [Zerops Backups](/features/backup) documentation.
+
+### Restoring Backups
+
+To restore an Elasticsearch backup:
+
+1. **Download** the backup file (`.gz`) from the Zerops UI
+2. **Extract** the compressed files to access the JSON data
+3. **Prepare** your target environment (clean existing indices or use a new instance)
+4. **Restore** using either:
+   - **elasticdump tool**: Use the same tool that created the backup for restoration via Zerops VPN or during deployment
+   - **Elasticsearch API**: Import the data through REST API [calls](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/restore-snapshot)
+
+For assistance with the restoration process, contact Zerops support.
+
+## Example Configuration
+
+```yaml
+services:
+  - hostname: elasticsearch
+    type: elasticsearch@8.16
+    mode: HA
+    envSecrets:
+      PLUGINS: "analysis-icu,ingest-attachment"
+      HEAP_PERCENT: "75"
+```
+
+## Related Resources
+
+- [Elasticsearch Official Documentation](https://www.elastic.co/guide/index.html)
+- [Available Elasticsearch Plugins](https://www.elastic.co/guide/en/elasticsearch/plugins/current/index.html)

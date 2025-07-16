@@ -14,6 +14,8 @@ import Unlisted from '@theme/Unlisted';
 import type { Props } from '@theme/DocItem/Layout';
 import { useSidebar } from '../../../providers/Sidebar';
 import Footer from '@theme/Footer';
+import { NavigationButtons } from "../../../components/NavigationButons";
+
 
 /**
  * Decide if the toc should be rendered, on mobile or desktop viewports
@@ -42,7 +44,7 @@ function useDocTOC() {
 export default function DocItemLayout({ children }: Props): JSX.Element {
   const docTOC = useDocTOC();
   const {
-    metadata: { unlisted },
+    metadata: { unlisted, previous, next },
   } = useDoc();
   const sidebarContext = useSidebar();
   return (
@@ -51,22 +53,34 @@ export default function DocItemLayout({ children }: Props): JSX.Element {
         className={clsx(
           'col',
           'my-0 mx-auto max-w-main-content w-full ml-auto lg:py-0 py-0 px-1',
-          !docTOC.hidden && 'w-9/12',
-          !sidebarContext?.hiddenSidebarContainer && '!max-w-[720px]'
+          !docTOC.hidden && 'w-9/12 !max-w-[760px]',
+          docTOC.hidden && 'flex justify-center !max-w-[920px]'
         )}
       >
-        {unlisted && <Unlisted />}
-        <DocVersionBanner />
-        <div>
-          <article className={clsx('[&>*:first-child]:mt-0')}>
-            <DocBreadcrumbs />
-            <DocVersionBadge />
-            {docTOC.mobile}
-            <DocItemContent>{children}</DocItemContent>
-            <DocItemFooter />
-          </article>
-          <DocItemPaginator />
-          <Footer />
+        <div className={clsx(docTOC.hidden && 'w-full')}>
+          {unlisted && <Unlisted />}
+          <DocVersionBanner />
+          <div>
+            <article className={clsx('[&>*:first-child]:mt-0', 'px-1')}>
+              <DocBreadcrumbs />
+              <DocVersionBadge />
+              {docTOC.mobile}
+              <DocItemContent>{children}</DocItemContent>
+              <NavigationButtons
+                prevPage={previous && {
+                  href: previous.permalink,
+                  title: previous.title
+                }}
+                nextPage={next && {
+                  href: next.permalink,
+                  title: next.title
+                }}
+              />
+              <DocItemFooter />
+            </article>
+            <DocItemPaginator />
+            <Footer />
+          </div>
         </div>
       </div>
       {docTOC.desktop && (

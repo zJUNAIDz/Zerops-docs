@@ -1,0 +1,154 @@
+---
+title: Laravel Logging
+description: Learn How to Configure and Access Logs for Your Laravel Application on Zerops
+---
+
+import Image from '/src/components/Image';
+import { Dropdown, DropdownItem } from '/src/components/Dropdown';
+
+Zerops provides comprehensive logging capabilities for Laravel applications using its distributed logging architecture. This guide shows you how to set up and optimize Laravel logging on Zerops, ensuring your application logs are properly captured and accessible.
+
+## Accessing Logs
+
+Learn how to [access and view your logs](/php/how-to/logs) in Zerops.
+
+## Configuration
+
+### Zerops Environment Variables
+
+Laravel logging in Zerops is configured through environment variables, such as:
+
+- `LOG_CHANNEL`: Specifies which logging channel to use (e.g., 'syslog', 'stack')
+- `LOG_STACK`: When using the stack channel, defines which channels to include
+- `LOG_LEVEL`: Sets the minimum log level to capture (e.g., 'debug', 'info', 'error')
+
+```yaml title="zerops.yaml"
+zerops:
+  - setup: app
+    run:
+      envVariables:
+        LOG_CHANNEL: syslog
+        LOG_LEVEL: debug
+        LOG_STACK: single
+```
+
+:::tip Available Log Channels
+Laravel supports several logging channels out of the box:
+- **stack**: Aggregates multiple logging channels into a single channel
+- **single**: Writes logs to a single file (storage/logs/laravel.log)
+- **daily**: Creates daily rotating log files
+- **syslog**: Writes to system log (recommended for Zerops)
+- **stderr**: Writes to PHP's standard error output stream
+- **errorlog**: Uses PHP's error_log function
+- **slack**: Sends log messages to Slack
+- **papertrail**: Sends logs to Papertrail
+- **mongodb**: Stores logs in MongoDB (requires additional package)
+:::
+
+To use multiple logging channels, [configure](#laravel-configuration) the stack channel:
+
+```yaml
+LOG_CHANNEL: stack
+LOG_STACK: syslog,daily
+```
+
+This configuration logs to both syslog (for Zerops) and daily files (for local access).
+
+:::tip
+Using appropriate log levels makes it easier to filter and find relevant messages in the Zerops GUI.
+:::
+
+### Laravel Configuration
+
+While Zerops is configured through environment variables, these variables are interpreted by Laravel's logging system. By default, Laravel includes a logging configuration that works out of the box - you don't need to modify anything.
+
+If you're curious about the underlying configuration or need to customize it beyond environment variables, here's what Laravel's logging configuration typically looks like:
+
+<Dropdown>
+    <DropdownItem title="Configuration example">
+```php title="config/logging.php"
+<?php
+
+use Monolog\Handler\NullHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\SyslogUdpHandler;
+use Monolog\Processor\PsrLogMessageProcessor;
+
+return [
+    'default' => env('LOG_CHANNEL', 'stack'),
+
+    'deprecations' => [
+        'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
+        'trace' => env('LOG_DEPRECATIONS_TRACE', false),
+    ],
+
+    'channels' => [
+        'stack' => [
+            'driver' => 'stack',
+            'channels' => explode(',', env('LOG_STACK', 'single')),
+            'ignore_exceptions' => false,
+        ],
+
+        'single' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'daily' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
+        'stderr' => [
+            'driver' => 'monolog',
+            'handler' => StreamHandler::class,
+            'with' => [
+                'stream' => 'php://stderr',
+            ],
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
+        'syslog' => [
+            'driver' => 'syslog',
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
+        'errorlog' => [
+            'driver' => 'errorlog',
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+    ],
+];
+```
+</DropdownItem>
+</Dropdown>
+
+### Using Logs
+
+Laravel provides several ways to write log messages:
+
+```php
+// Using facade
+use Illuminate\Support\Facades\Log;
+
+Log::emergency($message);
+Log::alert($message);
+Log::critical($message);
+Log::error($message);
+Log::warning($message);
+Log::notice($message);
+Log::info($message);
+Log::debug($message);
+
+// Using helper function
+logger()->info($message);
+logger($message); // defaults to info level
+
+// With context data
+Log::info('User failed to login.', ['id' => $user->id]);
+```

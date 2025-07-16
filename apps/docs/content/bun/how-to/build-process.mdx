@@ -1,0 +1,17 @@
+---
+title: Bun build process
+description: Learn more about build process of Bun application
+---
+
+import { SetVar } from '@site/src/components/content/var';
+import BuildProcessContent from '@site/src/components/content/build-process.mdx';
+
+<SetVar name="servicePath" value="bun" />
+<SetVar name="serviceDisplay" value="Bun" />
+<SetVar name="defaultEnvironment" value="Bun package manager, Git and Bun runtime" />
+<SetVar name="buildCommandExample" value={`buildCommands:
+  - bun install --verbose
+  - bun build --target=bun`} />
+<SetVar name="codeLanguage" value="yaml" />
+
+<BuildProcessContent />

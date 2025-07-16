@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💁 Support
-    url: https://discord.gg/xxzmJSDKPT
+    url: https://docs.zerops.io/discord
     about: 'This issue tracker is not for support questions. Join us on Discord for assistance!'
   - name: 📘 Documentation
     url: https://github.com/zeropsio/docs
@@ -9,6 +9,3 @@ contact_links:
   - name: 💡 Share Your Thoughts with Us - New Features, Improvements, and Questions
     url: https://github.com/zeropsio/community/discussions
     about: Propose and discuss future improvements to Zerops
-  - name: 💬 Chat
-    url: https://discord.gg/xxzmJSDKPT
-    about: Our Discord server is active, come join us!

@@ -1,83 +1,154 @@
-# Integrating your GitHub repository
+---
+title: Integrating your GitHub repository
+description: Learn how to integrate your GitHub repositories with Zerops
+---
 
-Integrate Zerops to your GitHub repository and configure the automatic builds and deploys.
+Discover how to seamlessly integrate your GitHub repository with Zerops for automated builds and deployments.
+
+You can choose between two powerful integration approaches: direct integration through the Zerops GUI for straightforward setup, or GitHub Actions for more customized deployment workflows.
+
+This guide walks you through both integration methods, helping you choose and implement the approach that best fits your team's needs.
 
 ---
 
 ## Prerequisites
 
-Before you start the integration, ensure you have `zerops.yml` file in the root of your repository.
-For more information, refer to our [zerops.yml](/references/zeropsyml) documentation.
+Before starting the integration process, ensure your repository contains a valid `zerops.yaml` configuration file located in the root directory. This file is essential for defining the build, deploy, and run processes.
+For detailed information on how to create or modify this file, refer to the [Zerops YAML configuration](/zerops-yaml/specification) guide.
 
 ---
 
-## Integration Steps
+## Integration via Zerops GUI
+
+Follow these steps to connect your GitHub repository directly with Zerops:
 
 1. **Access Service Settings**
 
-   - Log into the [Zerops GUI](https://app.zerops.io/)
-   - Select your service
-   - Navigate to "Build, deploy, run pipeline settings" in the left menu
+   - Log into the [**Zerops GUI**](https://app.zerops.io/)
+   - Select the relevant service from your dashboard.
+   - In the left-hand menu, navigate to **Build, Deploy, Run Pipeline Settings**.
 
 2. **Connect to GitHub**
 
-   - Click "Connect with a GitHub repository"
-   - Grant Zerops access to your repositories when prompted
+   - Click **Connect with a GitHub repository**
+   - You'll be prompted to authorize Zerops to access your GitHub account.
+   - Grant the necessary permissions for Zerops to manage webhooks and fetch your code.
 
 :::note
-Zerops requires full access to configure webhooks and download your code. We don't store your source code unless explicitly specified.
+Zerops requires full access to your repository in order to configure webhooks and pull the latest code changes. However, Zerops does not store your source code unless explicitly specified by you.
 :::
 
 3. **Select Repository and Trigger**
 
-   - Choose the repository to integrate
-   - Select a trigger method
-     - New tag: Builds trigger on new tags **(Recommended)**
-       - Optionally add a regex to filter tags
-     - Push to branch: Builds trigger on pushes to specific branch
+   - Choose the GitHub repository you'd like to integrate with Zerops.
+   - Configure the trigger that will initiate a build:
+     - **New tag**: Builds are triggered whenever a new tag is created. This is the recommended option for production deployments.
+       - You can optionally add a regular expression (regex) to filter specific tags.
+     - **Push to branch**: Builds are triggered on every push to a specified branch, such as `main` or `develop`.
 
 4. **Finalize Setup**
 
-   - Confirm your settings to complete the integration
+   - Review and confirm your settings to complete the integration process.
+   - Your GitHub repository is now connected, and builds will be triggered based on the configured triggers.
 
 <p align="center">
   <img
     src="/img/gui/github-integration.webp"
     alt="image"
-    width="95%"
+    width="90%"
     height="auto"
-    style={{ borderRadius: 0.5 + 'rem', opacity: 0.8 }}
   />
 </p>
 
 ---
 
-## Managing Your Integration
+### Managing Your GitHub Integration
 
-To skip a build for a specific commit, include `[ci skip]` or `[skip ci]` (case insensitive) in your commit message.
+To skip triggering a build for a specific commit, you can include `ci skip` or `skip ci` in your commit message (case insensitive). This tells Zerops to ignore that particular commit during the build process.
 
 :::note
-The webhook will still show as delivered in GitHub, but no action will be taken.
+Although the webhook will still be delivered to GitHub, no action will be taken if `ci skip` is present in the commit message.
 :::
 
 ---
 
-## Disconnecting Your Repository
+### Disconnecting Your Repository
 
-### To stop the integration:
+To disconnect your GitHub repository from Zerops:
 
-1. Go to your service details
-1. Select "Build, deploy, run pipeline settings"
-1. Click "Stop automatic build trigger"
+1. Navigate to the **Service Details** page for the relevant service
+1. Select **Build, Deploy, Run Pipeline Settings** from the menu.
+1. Click **Stop automatic build trigger**
 
-**This action removes the GitHub webhook and deletes the integration configuration.**
+**This action will remove the GitHub webhook and delete the associated integration configuration, effectively halting automated builds from this repository.**
 
 <p align="center">
   <img
-    src="/img/screenshots/nodejs_cancel_running_build.png"
+    src="/img/screenshots/cancel_running_build.png"
     alt="image"
-    width="95%"
+    width="90%"
     height="auto"
-    style={{ borderRadius: 0.5 + 'rem', opacity: 0.8 }}
   />
 </p>
+
+### Authorizing Access to Organizations
+
+If you want to authorize Zerops to access a specific organization, you can do so by clicking on the **Grant** from [GitHub Applications Settings](https://github.com/settings/connections/applications/4408deded6c1fed7193c).
+
+---
+
+## GitHub Workflow Integration
+
+As an alternative to direct integration, you can use GitHub Actions to manage your deployments. This approach gives you more control over your deployment workflow and allows integration with other CI/CD processes.
+
+### GitHub Workflow using Zerops Actions
+
+1. **Create Workflow Configuration**
+
+   Create a new file at `.github/workflows/deploy.yaml` in your repository:
+
+   ```yaml
+   name: Deploy to Zerops
+   
+   on:
+     push:
+       branches:
+         - main
+   
+   jobs:
+     deploy:
+       runs-on: ubuntu-latest
+   
+       steps:
+         - name: Checkout code
+           uses: actions/checkout@v3
+   
+         - name: Deploy with Zerops
+           uses: zeropsio/actions@main
+           with:
+             access-token: ${{ secrets.ZEROPS_TOKEN }}
+             service-id: your-service-id
+   ```
+
+2. **Generate Access Token**
+
+   - Navigate to [**Settings > Access Token Management**](https://app.zerops.io/settings/token-management) in your Zerops dashboard
+   - Generate a new access token with appropriate permissions
+   - Copy this token for use in GitHub secrets
+
+3. **Locate Service ID**
+
+   - Go to your service dashboard and click the three dots menu → **Copy Service ID**
+   - Alternatively, find it in your service URL: `https://app.zerops.io/service-stack/<your-service-id>/dashboard`
+
+4. **Configure GitHub Secrets**
+
+   - Go to your GitHub repository settings
+   - Navigate to **Settings** > **Secrets and variables** > **Actions** > **Repository secrets**
+   - Add a new secret named `ZEROPS_TOKEN` with your access token value
+
+:::note
+Keep your access token secure and never commit it directly to your repository. The token provides administrative access to your Zerops resources.
+:::
+
+For more information about GitHub Actions, refer to the [official GitHub Actions documentation](https://docs.github.com/en/actions).

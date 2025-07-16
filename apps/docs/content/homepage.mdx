@@ -1,144 +1,98 @@
 ---
 id: homepage
 title: Zerops Documentation
+description: Get started with the Zerops cloud platform with our knowledge base.
+image: /og.png
 slug: /
-hide_table_of_contents: false
+hide_table_of_contents: true
 hide_footer: true
 ---
 
 import DocCard from '@theme/DocCard';
 import DocCardList from '@theme/DocCardList';
 import Icons from '@theme/Icon';
-import { Button, BorderedIcon } from 'docs-ui';
+import { Button } from 'docs-ui';
 import Link from '@docusaurus/Link';
 import IconArrow from '@theme/Icon/Arrow';
+import TechCard from '../src/components/TechCard'
+import BackgroundPattern from '../src/components/BackgroundPattern'
 
-# Zerops Documentation
+<BackgroundPattern />
 
-Zerops is a **developer-first Platform-as-a-Service**, running on **bare metal** from a top-tier datacenter, with every part built from scratch. Zerops aims to be the **perfect mix** of **developer experience**, **flexibility**, **scalability** and **affordability**, making it a **great fit** for applications of **any size**, **complexity** and **traffic**.
+export const runtimes = [
+    { name: "Node.js", link: "/nodejs/overview", icon: <Icons.nodejs/> },
+    { name: "PHP", link: "/php/overview", icon: <Icons.php/> },
+    { name: "Python", link: "/python/overview", icon: <Icons.python/> },
+    { name: "Go", link: "/go/overview", icon: <Icons.go/> },
+    { name: ".NET", link: "/dotnet/overview", icon: <Icons.dotnet/> },
+    { name: "Rust", link: "/rust/overview", icon: <Icons.rust/> },
+    { name: "Java", link: "/java/overview", icon: <Icons.java/> },
+    { name: "Deno", link: "/deno/overview", icon: <Icons.deno/> },
+    { name: "Bun", link: "/bun/overview", icon: <Icons.bun/> },
+    { name: "Elixir", link: "/elixir/overview", icon: <Icons.elixir/> },
+    { name: "Gleam", link: "/gleam/overview", icon: <Icons.gleam/> },
+    { name: "Nginx", link: "/nginx/overview", icon: <Icons.nginx/> },
+    { name: "Static", link: "/static/overview", icon: <Icons.computer-desktop/> },
+]
 
-<br />
+export const containers = [
+    { name: "Docker", link: "/docker/overview", icon: <Icons.docker/> },
+    { name: "Alpine", icon: <Icons.alpine/> },
+    { name: "Ubuntu", icon: <Icons.ubuntu/> },
+]
+
+export const databases = [
+    { name: "PostgreSQL", link: "/postgresql/overview", icon: <Icons.postgresql/> },
+    { name: "MariaDB", link: "/mariadb/overview", icon: <Icons.mariadb/> },
+    { name: "Valkey", link: "/valkey/overview", icon: <Icons.valkey/> },
+    { name: "Elasticsearch", link: "/elasticsearch/overview", icon: <Icons.elasticsearch/> },
+    { name: "Typesense", link: "/typesense/overview", icon: <Icons.typesense/> },
+    { name: "Meilisearch", link: "/meilisearch/overview", icon: <Icons.meilisearch/> },
+    { name: "Qdrant", link: "/qdrant/overview", icon: <Icons.qdrant/> },
+    { name: "NATS", link: "/nats/overview", icon: <Icons.nats/> },
+    { name: "Kafka", link: "/kafka/overview", icon: <Icons.kafka/> },
+    { name: "ClickHouse", link: "/clickhouse/overview", icon: <Icons.clickhouse/> },
+    { name: "KeyDB", link: "/keydb/overview", icon: <Icons.keydb/> },
+]
+
+export const storages = [
+    { name: "Object storage", link: "/object-storage/overview", icon: <Icons.cube-solid/> },
+    { name: "Shared storage", link: "/shared-storage/overview", icon: <Icons.server/> },
+]
+
+<div className="!max-w-xxl !mx-none">
+
+Zerops is a **developer-first Platform-as-a-Service**, running on bare metal, with every part built from scratch. Zerops aims to be the perfect mix of **developer experience**, **flexibility**, **scalability** and **affordability**, making it a great fit for applications of any size, complexity and traffic.
 
 ## Natively supported services
 
-### Runtimes, web servers & Linux containers
+### Runtimes & web servers
 
-For these services Zerops provides pre-prepared build and runtime images and flexible pipeline that allows you
-to modify them and build your applications.
+For these services Zerops provides pre-prepared build and runtime images and flexible pipeline that allows you to modify them and build your applications.
 
-<DocCardList
-  colSize={4}
-  items={[
-    {
-      type: 'link',
-      href: '/nodejs/overview',
-      label: 'Node.js',
-      customProps: {
-        icon: Icons['nodejs'],
-      },
-    },
-    {
-      type: 'link',
-      href: '/go/overview',
-      label: 'Go',
-      customProps: {
-        icon: Icons['go'],
-      },
-    },
-    {
-      type: 'link',
-      href: '/php/overview',
-      label: 'PHP',
-      customProps: {
-        icon: Icons['php'],
-      },
-    },
-    {
-      type: 'link',
-      href: '/python/overview',
-      label: 'Python',
-      customProps: {
-        icon: Icons['python'],
-      },
-    },
-    {
-      type: 'link',
-      href: '/dotnet/overview',
-      label: '.NET',
-      customProps: {
-        icon: Icons['dotnet'],
-      },
-    },
-    {
-      type: 'link',
-      href: '/rust/overview',
-      label: 'Rust',
-      customProps: {
-        icon: Icons['rust'],
-      },
-    },
-  ]}
-/>
+<TechCard
+items={runtimes} />
+
+### Linux containers & VMs
+
+These services can be deployed either as plain Linux containers or using Docker images, giving you flexibility to run any application or service.
+
+<TechCard
+items={containers} />
 
 ### Databases, search engines & message brokers
 
 These services are fully managed by Zerops and offered in highly available and single container modes.
 
-<DocCardList
-  colSize={4}
-  items={[
-    {
-      type: 'link',
-      href: '/postgresql/overview',
-      label: 'PostgreSQL',
-      customProps: {
-        icon: Icons['postgresql'],
-      },
-    },
-    {
-      type: 'link',
-      href: '/mariadb/overview',
-      label: 'MariaDB (MySQL)',
-      customProps: {
-        icon: Icons['mariadb'],
-      },
-    },
-    {
-      type: 'link',
-      href: '/keydb/overview',
-      label: 'KeyDB (Redis)',
-      customProps: {
-        icon: Icons['keydb'],
-      },
-    },
-  ]}
-/>
+<TechCard
+items={databases} />
 
 ### Storages
 
 Fully managed S3 compatible storage running on a separate infrastructure and persistent disk that can be mounted to multiple services.
 
-<DocCardList
-  colSize={4}
-  items={[
-    {
-      type: 'link',
-      href: '/object-storage/overview',
-      label: 'Object storage',
-      customProps: {
-        icon: Icons['cube-solid'],
-      },
-    },
-    {
-      type: 'link',
-      href: '/shared-storage/overview',
-      label: 'Shared storage',
-      customProps: {
-        icon: Icons['server'],
-      },
-    },
-  ]}
-/>
+<TechCard
+items={storages} />
 
 <br />
 <br />
@@ -159,8 +113,8 @@ Fully managed S3 compatible storage running on a separate infrastructure and per
     },
     {
       type: 'link',
-      href: '/references/zeropsyml',
-      label: 'zerops.yml',
+      href: '/zerops-yaml/specification',
+      label: 'zerops.yaml',
       customProps: {
         icon: Icons['document-text'],
         html: 'Configuration file placed to your repository, telling Zerops how to build and start your app.',
@@ -208,7 +162,7 @@ You get a fully managed, professional infrastructure setup that will scale no ma
 
 ### ➡️ Granular resource configuration, autoscaling and high availability of services
 
-Zerops has fully automatic horizontal and vertical scaling with configuration steps as small as 0.25 MB RAM and 1 CPU core. Your runtime services can go from a single container with 0.25 RAM and 1 CPU core to 10 containers each with 32 GB RAM and 10 CPU cores and then back in a matter of minutes. At the same time, all database and storage services are offered in well-crafted setups that go through performance optimizations while scaling and are available in both non-HA (single container) and high availability (multiple containers and balancers) modes.
+Zerops has fully automatic horizontal and vertical scaling with configuration steps as small as 0.125 GB RAM and 1 CPU core. Your runtime services can go from a single container with 0.25 RAM and 1 CPU core to 10 containers each with 32 GB RAM and 10 CPU cores and then back in a matter of minutes. At the same time, all database and storage services are offered in well-crafted setups that go through performance optimizations while scaling and are available in both non-HA (single container) and high availability (multiple containers and balancers) modes.
 
 :::tip[**What does this mean for you?**]
 
@@ -244,6 +198,5 @@ You get a built-in powerful and flexible pipeline to modify build and runtime im
 
 You get a powerful managed platform with all the best features unlocked for a price that's nearly on par with VPS. You can create as many environments as you need, even one for each developer working on a project, all with the same infrastructure as production, so they can utilize Zerops for their local development. No more "but it works on my machine".
 
-<Button variant="secondary"><Link href="/features/developer-first">Read more about our developer first approach</Link></Button>
-
 :::
+</div>

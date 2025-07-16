@@ -1,0 +1,444 @@
+---
+title: Using Zerops Setup Control (zsc)
+description: Interacting with zerops containers by connecting to the project network via zcli vpn with wireguard.
+---
+
+import Image from '/src/components/Image';
+
+Zerops Setup Control (zsc) is a command-line utility automatically installed in all Zerops containers enabling developers to manage and control container environments directly from within both runtime and build contexts.
+
+Zerops Setup Control provides essential capabilities for container management, including resource scaling, technology installation, and environment configuration.
+
+Zerops Setup Control commands can be executed in two ways:
+
+- **Manual execution**:
+  - From the web terminal interface in Zerops GUI
+  - Using SSH connections to your containers
+- **Automated execution**:
+  - As part of your `zerops.yaml` configuration file
+
+## Usage
+
+```sh
+zsc <command> [flags]
+```
+
+## Commands
+
+---
+
+### help
+
+This command lists available commands and flags on a command by placing `help`, `-h` or `--help` flag after the command.
+
+```sh
+zsc help
+# or
+zsc --help
+# or
+zsc -h
+```
+
+---
+
+### completion
+
+Generate the autocompletion script for zsc for the specified shell.
+
+```sh
+zsc completion [command]
+```
+
+#### Available sub-commands
+- `bash`: Generate the autocompletion script for bash
+- `fish`: Generate the autocompletion script for fish
+- `powershell`: Generate the autocompletion script for powershell
+- `zsh`: Generate the autocompletion script for zsh
+
+#### Available flags
+- `-h, --help`: Help for the completion command
+
+---
+
+### backup-create
+
+Creates a backup of any specified stack in your project.
+
+```sh
+zsc backup-create <stackName>
+```
+
+#### Required parameters
+- `stackName`: Name of the stack to backup
+
+#### Available flags
+- `-h, --help`: Help for the backup-create command
+
+#### Example
+```sh
+zsc backup-create db
+```
+
+---
+
+### cdn
+
+Manages CDN (Content Delivery Network) operations for your Zerops services.
+
+```sh
+zsc cdn [command]
+```
+
+#### Available sub-commands
+- `purge`: Invalidates cached content from the CDN for a specific domain. The purge command allows you to ensure that the most up-to-date content is being served to visitors after making updates to your site.
+
+#### Available flags
+- `-h, --help`: Help for the cdn command
+
+#### Examples
+```sh
+# Purge all CDN cache for a specific domain
+zsc cdn purge example.com
+# Purge all content using wildcard pattern
+zsc cdn purge example.com "/*"
+# Purge CDN cache for a specific file (note the $ suffix)
+zsc cdn purge example.com "/path/to/my-file$"
+# Purge CDN cache for a specific directory
+zsc cdn purge example.com "/images/"
+```
+
+:::important
+- This command must be executed in any container within the project that has the CDN-enabled domain active
+- Currently, the purge command only works for the [Static Mode](/features/cdn#static-mode) CDN
+:::
+---
+
+### shared-storage
+
+Manages shared storage volumes for persistent data storage.
+
+```sh
+zsc shared-storage [command]
+```
+
+#### Available sub-commands
+- `mount`: Mounts the shared storage
+- `unmount`: Unmounts the shared storage
+- `wait`: Waits for readiness of the storage mount
+
+#### Available flags
+- `-h, --help`: Help for the shared-storage command
+
+#### Examples
+```sh
+# View shared-storage help
+zsc shared-storage --help
+
+# Mount a shared storage volume
+zsc shared-storage mount <storage-name>
+
+# Unmount a shared storage volume
+zsc shared-storage unmount <storage-name>
+
+# Wait for a storage mount to be ready
+zsc shared-storage wait <storage-name>
+```
+
+---
+
+### crontab
+
+Manages scheduled tasks that are defined in your zerops.yaml configuration.
+
+```sh
+zsc crontab [command]
+```
+
+#### Available sub-commands
+- `list`: List all crontabs defined in zerops.yaml
+- `run`: Execute crontab command defined in zerops.yaml
+
+#### Available flags
+- `-h, --help`: Help for the crontab command
+
+---
+
+### execOnce
+
+Execute a command exactly once across all containers in a service, preventing duplicate execution in high-availability setups.
+
+```sh
+zsc execOnce [flags] <key> -- <command> [args...]
+```
+
+#### Required parameters
+* `<key>`: A unique identifier for the execution
+* `--`: Standard separator indicating the end of options and beginning of the command
+* `<command> [args...]`: The actual command to execute and its arguments
+
+#### Available flags
+- `-r, --retryUntilSuccessful`: Retry command until it succeeds
+- `-v, --verbose`: Verbose output
+- `-h, --help`: Help for the execOnce command
+
+#### Behavior
+- **On success**: All containers proceed with their tasks
+- **On failure**: All containers report the command as failed
+- **With --retryUntilSuccessful**: The command is retried on a different container until it succeeds
+
+#### Examples
+```sh
+# Execute a command once for the entire service stack
+zsc execOnce someStaticKey -- /var/www/myBinary some initial command --flag="value" --flag2="value2"
+
+# Run migrations for each new app version deployed to Zerops
+zsc execOnce ${ZEROPS_appVersionId} -- php /var/bin/console migrations:continue
+```
+
+:::info
+This command is ideal for database migrations, initialization scripts, and other operations that should only run once in clustered environments.
+:::
+
+---
+
+### fail-me
+
+Deliberately fails the current container for testing purposes.
+
+```sh
+zsc fail-me
+```
+
+#### Available flags
+- `-h, --help`: Help for the fail-me command
+
+---
+
+### install
+
+Run install commands for the specified base technology in your runtime container.
+
+```sh
+zsc install <baseName> [flags]
+```
+
+#### Required parameters
+- `baseName`: The technology and version to install - see the full list of supported [base environments](/zerops-yaml/base-list).
+
+#### Available flags
+- `--buildBase <string>`: Build base (default "php@8.4")
+- `--buildOs <string>`: Build os (default "alpine")
+- `-m, --mode <string>`: Mode (default "RUNTIME")
+- `--runBase <string>`: Run base (default "php-nginx@8.4")
+- `--runOs <string>`: Run os (default "alpine")
+- `-h, --help`: Help for the install command
+
+#### Examples
+```sh
+zsc install rust@1.78
+zsc install dotnet@8
+zsc install nginx@1.22
+```
+
+#### Example usage in `zerops.yaml`
+```yaml
+zerops:
+  - setup: nodejsapp
+    build:
+      os: ubuntu
+      base:
+        - nodejs@22
+        - python@3.11
+    run:
+      os: ubuntu
+      base: nodejs@22
+      prepareCommands:
+        - zsc install python@3.11
+```
+
+---
+
+### noop
+
+Keep a container alive indefinitely with a non-terminating process.
+
+```sh
+zsc noop [flags]
+```
+
+#### Available flags
+- `-s, --silent`: Disables output to StdOut
+- `-h, --help`: Help for the noop command
+
+#### Examples
+```sh
+zsc noop
+zsc noop --silent
+```
+
+:::info
+The `noop` command is especially useful for:
+- Debugging build failures by keeping containers alive for investigation
+- Supporting applications that run as background daemons
+- Keeping service containers active when your app doesn't have a foreground process
+- As a start command in zerops.yaml for services that don't have a natural blocking command
+:::
+
+#### Usage in zerops.yaml
+```yaml
+zerops:
+  - setup: myapp
+    run:
+      start: zsc noop
+      ports:
+        - port: 8080
+          http: true
+```
+
+---
+
+### resources
+
+Displays the current resource scaling configuration for the container.
+
+```sh
+zsc resources
+```
+
+#### Available flags
+- `-h, --help`: Help for the resources command
+
+#### Example output
+```json
+{
+    "cpuCoreCount": 1,
+    "memoryGBytes": 0.25,
+    "diskGBytes": 1
+}
+```
+
+#### Related commands
+- `zsc scale`: Dynamically adjust resource allocations
+
+---
+
+### scale
+
+Dynamically adjust CPU or memory resources for the current container for a specified duration.
+
+```sh
+zsc scale {cpu|ram} {<value> <duration>|auto}
+```
+
+#### Required parameters
+- `cpu|ram`: Resource type to scale (either CPU cores or RAM)
+- `<value> <duration>` or `auto`: Scale value and duration, or "auto" to disable custom scaling
+
+#### Available flags
+- `-h, --help`: Help for the scale command
+
+#### Supported values
+- **For RAM**: Value must be suffixed by a unit (KiB, MiB, GiB); number may be a float.
+- **For CPU**: Value must not be suffixed; number must be an integer.
+- **"auto"**: Disables any custom scaling set via this command and must be used without the duration parameter.
+- **"min"** and **"max"**: Set the container to its CURRENT min and max values.
+- Numeric values can be prefixed with **"+"** for relative scaling, adding the requested value to currently used resources.
+- Duration must be suffixed by a unit (s = seconds, m = minutes, h = hours, d = days) and cannot be less than 10 minutes.
+
+#### Examples
+```sh
+zsc scale cpu auto
+zsc scale cpu 5 1h
+zsc scale cpu +2 30m
+zsc scale cpu min 10m
+zsc scale ram auto
+zsc scale ram 5GB 1h
+zsc scale ram +2.5GB 600s
+zsc scale ram max 10m
+```
+
+:::info
+- Resource adjustments take effect within approximately 10 seconds
+- The container cannot be scaled above or below its max/min resources set in the vertical autoscaling configuration
+- If you scale to a value that exceeds the maximum set limit (e.g., 10GB RAM when max is 5GB), the container will only receive the maximum allowed resources
+- If service limits are changed while custom scaling is active, the container will automatically adjust to the new boundaries
+- If the service auto-scaling configuration is updated, you must call the scale command again to apply custom scaling
+:::
+
+:::caution
+If there are insufficient resources on the current server, the container might be moved to another node with available resources, which will reset the scale duration.
+The container will scale down automatically if resources are not utilized, or if the scale command duration expires.
+:::
+
+---
+
+### test
+
+Run diagnostic tests to verify connectivity and service availability.
+
+```sh
+zsc test tcp <host>:<port> [flags]
+```
+
+#### Required parameters
+- `<host>:<port>`: Host and port to test connectivity to
+
+#### Available flags
+- `--timeout <duration>`: Maximum test duration (default: 30s)
+- `--dialTimeout <duration>`: Single attempt timeout (default: 2s)
+- `-4`: Force IPv4
+- `-6`: Force IPv6
+- `-h, --help`: Help for the test tcp command
+
+#### Example
+```sh
+# Test TCP connection to a host
+zsc test tcp api.zerops:80
+zsc test tcp database:5432 --timeout 1m
+```
+
+---
+
+### setSecretEnv
+
+Securely update environment variables containing sensitive information.
+
+```sh
+zsc setSecretEnv <key> <content>
+```
+
+#### Arguments
+- `key`: The name of the environment variable to set
+- `content`: The new value for the variable, or `-` to read from stdin
+
+#### Available flags
+- `-h, --help`: Help for the setSecretEnv command
+
+#### Examples
+```sh
+# Set a secret environment variable directly
+zsc setSecretEnv SECRET_KEY "new_value"
+
+# Set a secret environment variable from stdin (useful for multi-line values or piping)
+echo "new_value" | zsc setSecretEnv SECRET_KEY -
+
+# Set a secret API key from a file
+cat api_key.txt | zsc setSecretEnv API_KEY -
+```
+
+:::info
+Secret environment variables are encrypted at rest and securely distributed to your containers. Use this command for storing sensitive configuration like API keys, tokens, and passwords.
+:::
+
+---
+
+### version
+
+Displays the current version of Zsc CLI.
+
+```sh
+zsc version
+```
+
+#### Available flags
+- `-h, --help`: Help for the version command

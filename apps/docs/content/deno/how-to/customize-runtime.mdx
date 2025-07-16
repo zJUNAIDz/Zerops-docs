@@ -1,0 +1,83 @@
+---
+title: Customise Deno runtime environment
+description: Learn how you can customise your deno runtime environment on Zerops.
+---
+
+import data from '@site/static/data.json';
+import { SetVar, VarCodeBlock } from '@site/src/components/content/var';
+
+## Build Custom Runtime Images
+
+Zerops allows you to build custom runtime images (CRI) when the default base runtime images don't meet your Deno application's requirements. This is an optional phase in the [build and deploy pipeline](/features/pipeline#runtime-prepare-phase-optional).
+
+:::important
+You should not include your application code in the custom runtime image, as your built/packaged code is deployed automatically into fresh containers.
+:::
+
+## Configuration
+
+### Default Deno Runtime Environment
+
+The default Deno runtime environment contains:
+
+- <span>{data.ubuntu.default}</span>
+- Selected version of Deno when the runtime service was created
+- [zCLI](/references/cli)
+- Deno and Git
+
+### When You Need a Custom Runtime Image
+
+If your Deno application needs more than what's included in the default environment, you'll need to build a custom runtime image. Common scenarios include:
+
+- **System packages for processing**: When your app processes images, videos, or files (requiring packages like `sudo apt-get install -y imagemagick`)
+- **Global Deno tools**: When you need CLI tools or utilities available system-wide
+- **Native dependencies**: When your Deno modules require system libraries that aren't in the default environment
+
+Here are Deno-specific examples of configuring custom runtime images in your `zerops.yml`:
+
+### Basic Deno Setup
+
+<SetVar name="serviceVersion" value={data.deno.base[0][0]} />
+<SetVar name="basicSetupCode" value={`run:
+  base: {{serviceVersion}}
+  prepareCommands:
+    - sudo apt-get update
+    - sudo apt-get install -y imagemagick
+    - deno install --allow-all --global some-tool`} />
+    <SetVar name="codeLanguage" value="yaml" />
+<VarCodeBlock codeVar="basicSetupCode" languageVar="codeLanguage" />
+
+### Using Build Files in Runtime Preparation
+
+```yaml
+build:
+  addToRunPrepare:
+    - deno.json
+    - import_map.json
+run:
+  prepareCommands:
+    - sudo apt-get update
+    - sudo apt-get install -y imagemagick
+    - deno cache deps.ts
+```
+
+For complete configuration details, see the [runtime prepare phase configuration guide](/features/pipeline#configuration).
+
+## Process and Caching
+
+### How Runtime Prepare Works
+The runtime prepare process follows the same steps for all runtimes. See [how runtime prepare works](/features/pipeline#how-it-works) for the complete process details.
+
+### Caching Behavior
+Zerops caches custom runtime images to optimize deployment times. Learn about [custom runtime image caching](/features/pipeline#custom-runtime-image-caching) including when images are cached and reused.
+
+### Build Management
+For information about managing builds and deployments, see [managing builds and deployments](/features/pipeline#manage-builds-and-deployments).
+
+:::warning
+Shared storage mounts are not available during the runtime prepare phase.
+:::
+
+## Troubleshooting
+
+If your `prepareCommands` fail, check the [prepare runtime log](/deno/how-to/logs#prepare-runtime-log) for specific error messages.

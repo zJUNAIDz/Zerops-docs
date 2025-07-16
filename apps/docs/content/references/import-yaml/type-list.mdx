@@ -1,0 +1,222 @@
+---
+title: List of supported service types
+description: The list of services available on Zerops.
+---
+
+import data from '@site/static/data.json';
+import UnorderedCodeList from '@site/src/components/UnorderedCodeList';
+
+This is a list of all supported service types that can be used in import yaml configuration file.
+
+:::note
+Versions listed on the same line are aliases of the same underlying version.
+:::
+
+## Available service types
+
+### Static Services
+
+<table className="w-full my-1.5 whitespace-nowrap">
+  <thead>
+    <tr>
+      <th className="">Service Type</th>
+      <th className="w-full">Versions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit">Nginx</td>
+      <td className="w-fit"><UnorderedCodeList data={data.nginx.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Static</td>
+      <td className="w-fit"><UnorderedCodeList data={data.static.import} /></td>
+    </tr>
+  </tbody>
+</table>
+
+### Containers and virtual machines
+
+<table className="w-full my-1.5 whitespace-nowrap">
+  <thead>
+    <tr>
+      <th className="">Service Type</th>
+      <th className="w-full">Versions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit">Alpine</td>
+      <td className="w-fit"><UnorderedCodeList data={data.alpine.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Ubuntu</td>
+      <td className="w-fit"><UnorderedCodeList data={data.ubuntu.import} /></td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+### Runtime services
+
+<table className="w-full my-1.5">
+  <thead>
+    <tr>
+      <th className="whitespace-nowrap">Service Type</th>
+      <th className="w-full">Versions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit">Bun</td>
+      <td className="w-fit"><UnorderedCodeList data={data.bun.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Deno</td>
+      <td className="w-fit"><UnorderedCodeList data={data.deno.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">.NET</td>
+      <td className="w-fit"><UnorderedCodeList data={data.dotnet.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Elixir</td>
+      <td className="w-fit"><UnorderedCodeList data={data.elixir.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Gleam</td>
+      <td className="w-fit"><UnorderedCodeList data={data.gleam.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit"><span class="anchor anchorWithStickyNavbar_------node_modules-@docusaurus-theme-classic-lib-theme-Heading-styles-module" id="go">Go</span></td>
+      <td className="w-fit"><UnorderedCodeList data={data.go.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Java</td>
+      <td className="w-fit"><UnorderedCodeList data={data.java.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Node.js</td>
+      <td className="w-fit"><UnorderedCodeList data={data.nodejs.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">PHP & Apache</td>
+      <td className="w-fit"><UnorderedCodeList data={data.php.import.apache} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">PHP & nginx</td>
+      <td className="w-fit"><UnorderedCodeList data={data.php.import.nginx} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Python</td>
+      <td className="w-fit"><UnorderedCodeList data={data.python.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Rust</td>
+      <td className="w-fit"><UnorderedCodeList data={data.rust.import} /></td>
+    </tr>
+  </tbody>
+</table>
+
+### Database services
+
+<table className="w-full my-1.5 whitespace-nowrap">
+  <thead>
+    <tr>
+      <th className="">Database Type</th>
+      <th className="w-full">Versions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit">KeyDB</td>
+      <td className="w-fit"><UnorderedCodeList data={data.keydb.import} /></td>
+    </tr>
+      <tr>
+      <td className="w-fit">MariaDB</td>
+      <td className="w-fit"><UnorderedCodeList data={data.mariadb.import} /></td>
+    </tr>
+        <tr>
+      <td className="w-fit">PostgreSQL</td>
+      <td className="w-fit"><UnorderedCodeList data={data.postgresql.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Qdrant</td>
+      <td className="w-fit"><UnorderedCodeList data={data.qdrant.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Valkey</td>
+      <td className="w-fit"><UnorderedCodeList data={data.valkey.import} /></td>
+    </tr>
+  </tbody>
+</table>
+
+### Search Engine
+
+<table className="w-full my-1.5 whitespace-nowrap">
+  <thead>
+    <tr>
+      <th className="">Search Engine</th>
+      <th className="w-full">Versions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit">Elasticsearch</td>
+      <td className="w-fit"><UnorderedCodeList data={data.elasticsearch.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Meilisearch</td>
+      <td className="w-fit"><UnorderedCodeList data={data.meilisearch.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Typesense</td>
+      <td className="w-fit"><UnorderedCodeList data={data.typesense.import} /></td>
+    </tr>
+  </tbody>
+</table>
+
+### Message Broker
+
+<table className="w-full my-1.5 whitespace-nowrap">
+  <thead>
+    <tr>
+      <th className="">Message Broker</th>
+      <th className="w-full">Versions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit">Kafka</td>
+      <td className="w-fit"><UnorderedCodeList data={data.kafka.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">NATS</td>
+      <td className="w-fit"><UnorderedCodeList data={data.nats.import} /></td>
+    </tr>
+  </tbody>
+</table>
+
+### Storage Services
+
+
+<table className="w-full my-1.5 whitespace-nowrap">
+  <thead>
+    <tr>
+      <th className="">Database Type</th>
+      <th className="w-full">Versions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit">Object storage</td>
+      <td className="w-fit"><UnorderedCodeList data={data.objectstorage.import} /></td>
+    </tr>
+    <tr>
+      <td className="w-fit">Shared storage</td>
+      <td className="w-fit"><UnorderedCodeList data={data.sharedstorage.import} /></td>
+    </tr>
+  </tbody>
+</table>

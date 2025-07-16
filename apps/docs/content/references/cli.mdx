@@ -6,9 +6,9 @@ description: Learn how to install and use zCLI, the powerful command-line tool f
 import CustomCard from '/src/components/CustomCard';
 import Image from '/src/components/Image';
 
-## What is zCLI?
+zCLI is the command-line tool for Zerops that allows users to manage services, simplify interactions, and configure infrastructure directly from the terminal.
 
-zCLI is the command-line tool for Zerops that allows users to manage services, simplify interactions, configure infrastructure directly from the terminal.
+For detailed information, see the [Configuration](/references/cli/configuration) and [Commands Reference](/references/cli/commands) pages.
 
 ## Platforms
 
@@ -20,20 +20,17 @@ zCLI currently supports:
 
 ## Get started
 
-To get started, you may install **zCLI** globally using [NPM](https://www.npmjs.com) or [Yarn](https://yarnpkg.com/) package manager:
+### Manual Installation
+
+To download the zCLI directly, get the [latest release](https://github.com/zeropsio/zcli/releases) from GitHub.
+
+### Linux/MacOS
 
 ```sh
-npm i -g @zerops/zcli
+curl -L https://zerops.io/zcli/install.sh | sh
 ```
 
-```sh
-yarn global add @zerops/zcli
-```
-
-<CustomCard emoji="🚀" title="Do you want to manually download the zCli binary?">
-  To download the zCLI directly, get the [latest
-  ↗](https://github.com/zeropsio/zcli/releases) release from GitHub.
-</CustomCard>
+zCLI will be installed inside `/usr/bin` or `/usr/local/bin`.
 
 ### Windows
 
@@ -43,13 +40,17 @@ irm https://zerops.io/zcli/install.ps1 | iex
 
 zCLI will be installed inside `C:\Program Files\` or `C:\Program Files (x86)\`
 
-### Linux/MacOS
+### Using Package Managers
+
+You can also install zCLI using package managers:
 
 ```sh
-curl -L https://zerops.io/zcli/install.sh | sh
+npm i -g @zerops/zcli
 ```
 
-zCLI will be installed inside `/usr/bin` or `/usr/local/bin`.
+```sh
+yarn global add @zerops/zcli
+```
 
 ### NixOS
 
@@ -103,7 +104,3 @@ You may use an access token to access Zerops using this command:
 ```sh
 zcli login <token>
 ```
-
-## References
-
-[zCLI Commands and Usage](/references/cli/commands)

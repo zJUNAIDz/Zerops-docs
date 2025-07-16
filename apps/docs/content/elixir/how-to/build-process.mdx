@@ -1,0 +1,17 @@
+---
+title: Elixir build process
+description: Learn more about build process of Elixir application
+---
+
+import { SetVar } from '@site/src/components/content/var';
+import BuildProcessContent from '@site/src/components/content/build-process.mdx';
+
+<SetVar name="servicePath" value="elixir" />
+<SetVar name="serviceDisplay" value="Elixir" />
+<SetVar name="defaultEnvironment" value="Erlang, Hex, Rebar and Git" />
+<SetVar name="buildCommandExample" value={`buildCommands:
+  - mix deps.get --verbose
+  - mix compile`} />
+<SetVar name="codeLanguage" value="yaml" />
+
+<BuildProcessContent />

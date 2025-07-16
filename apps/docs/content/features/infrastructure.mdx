@@ -1,31 +1,177 @@
-# Project & Services Structure
+---
+title: Project & Services Structure
+description: Explore Project & Services Structure on Zerops.
+---
+import Image from '/src/components/Image';
+import { CheckCircleSolid } from "@medusajs/icons";
+import { Dropdown, DropdownItem } from '/src/components/Dropdown';
 
-Zerops structure has three levels - _projects_, _services_ and _containers_.
+Zerops organizes your infrastructure into three hierarchical levels: **projects**, **services**, and **containers**. This structure provides secure networking, resource isolation, and scalable application deployment.
 
-## Project
+## Projects
 
-Project is the top-level entity, which consists of **services**. TODO max amount of projects
+A project is the top-level entity in Zerops, functioning as a private network where services can communicate internally and share environment variables. Each project provides essential infrastructure including load balancing, routing, and container orchestration.
 
-To function properly, a project needs its **"core"** to be running - which contains a logger service, a statistics service, HTTP routing with SSL certificates, IP routing with built-in firewall etc. It is created when the first user service is deployed and is charged a fixed monthly cost.
+### Key Project Features
 
-All services within a project share a dedicated **private network** and can access environment variables of other services.
+- **Private Networking**: All services within a project share a secure network
+- **Environment Variables**: Services can access shared environment variables
+- **IPv6/IPv4 Addressing**: Each project receives an IPv6 address, with optional IPv4 addressing
+- **Integrated Security**: Built-in firewall and SSL certificate management
 
-Each project is already created with a unique **IPv6 address**, and a unique **IPv4 address** can be assigned to the project for an extra cost.
-
-:::tip
-You can create a separate project for any environment (development, stage, production) or even for each developer if you so wish. Alternatively, you can benefit from a single project shared among all developers reducing the overall cost.
+:::tip Project Organization
+Consider your project strategy carefully. Create separate projects for different environments (dev/staging/prod) or consolidate related applications in a single project to optimize resources and simplify networking.
 :::
 
-## Services & Containers
+### Project Core Options
 
-A project can contain an unlimited number of services. Depending on the type of service, there are either **fully managed** (scaling, repairing, routing), or **partially managed** services.
+When you create a project, it requires a functioning **core** that includes logger and statistics services, HTTP routing with automatic SSL certificate management, and IP routing with integrated firewall.
 
-Each service contains **one or more Linux containers**, either of identical type as a HA mode and/or of different types. E.g. a fully managed MariaDB service in HA mode consists of 5 containers - 3 database ones and 2 proxies.
+Zerops offers two core types to match different needs and budgets:
 
-Each container image is based on one of **predefined Zerops images**. Depending on the technology these images range from **fully managed** (databases) to **fully customizable** (Ubuntu).
+#### Lightweight Core
 
-Each runtime environment or static web server services can be made **publicly accessible** through Zerops subdomains or domains, pointing your DNS records to the IPv6 or IPv4 addresses assigned to the project, or by setting up direct access by opening public ports on the assigned IP addresses.
+Single-container solution perfect for development projects and smaller production workloads. Includes project controller, L3 balancer, firewall, logger, statistics, and HTTP handling in one efficient package.
 
-:::tip
-Check out the section of the technology you need to get more information.
+<br/>
+<Image
+  lightImage="/img/mind-maps/lightweight.svg"
+  darkImage="/img/mind-maps/lightweight-dark.svg"
+  style={{
+    width: '44%',
+    height: 'auto',
+    display: 'block',
+    margin: '0 auto 0 10'
+  }}
+  alt="Lightweight Core"
+/>
+<br/>
+:::tip Ideal For
+Development environments, low-traffic applications, personal projects, budget-conscious teams.
 :::
+
+#### Serious Core
+
+Enterprise-grade infrastructure with separated core services across multiple containers for true redundancy and high availability.
+
+<br/>
+<Image
+  lightImage="/img/mind-maps/serious.svg"
+  darkImage="/img/mind-maps/serious-dark.svg"
+  style={{ width: '100%', height: 'auto' }}
+  alt="Serious Core"
+/>
+<br/>
+:::tip Ideal For
+Production applications, high-traffic websites, mission-critical business applications, teams requiring maximum uptime.
+:::
+
+#### Features Comparison
+
+<br/>
+<table className="w-full">
+  <thead>
+    <tr>
+      <th className="w-fit"></th>
+      <th className="w-fit"><strong>Lightweight Core</strong></th>
+      <th className="w-fit"><strong>Serious Core</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="w-fit font-semibold">Infrastructure</td>
+      <td className="w-fit">Single container (limited redundancy)</td>
+      <td className="w-fit">Multi-container (highly available)</td>
+    </tr>
+    <tr>
+      <td className="w-fit font-semibold">SSL Termination</td>
+      <td className="w-fit"><CheckCircleSolid /></td>
+      <td className="w-fit"><CheckCircleSolid /></td>
+    </tr>
+    <tr>
+      <td className="w-fit font-semibold">Automatic Certificate Generation</td>
+      <td className="w-fit"><CheckCircleSolid /></td>
+      <td className="w-fit"><CheckCircleSolid /></td>
+    </tr>
+    <tr>
+      <td className="w-fit font-semibold">Proxy / Load Balancer</td>
+      <td className="w-fit"><CheckCircleSolid /></td>
+      <td className="w-fit"><CheckCircleSolid /></td>
+    </tr>
+    <tr>
+      <td className="w-fit font-semibold">IPv6 Address</td>
+      <td className="w-fit"><CheckCircleSolid /></td>
+      <td className="w-fit"><CheckCircleSolid /></td>
+    </tr>
+    <tr>
+      <td className="w-fit font-semibold">Build Time</td>
+      <td className="w-fit">15 hours</td>
+      <td className="w-fit">150 hours</td>
+    </tr>
+    <tr>
+      <td className="w-fit font-semibold">Backup Space</td>
+      <td className="w-fit">5 GB</td>
+      <td className="w-fit">25 GB</td>
+    </tr>
+    <tr>
+      <td className="w-fit font-semibold">Egress</td>
+      <td className="w-fit">100 GB</td>
+      <td className="w-fit">3 TB</td>
+    </tr>
+    <tr>
+      <td className="w-fit font-semibold">Failover Protection</td>
+      <td className="w-fit">Limited</td>
+      <td className="w-fit">Comprehensive</td>
+    </tr>
+  </tbody>
+</table>
+
+For detailed pricing information on both core types, visit our [pricing page](/company/pricing#project-core-plans).
+
+#### Project Core Upgrade
+
+You can upgrade from Lightweight Core to Serious Core for enhanced reliability and increased resources.
+
+:::warning Important
+The core upgrade is a **partially destructive process** that will temporarily disrupt your project's operations. Plan upgrades during maintenance windows.
+:::
+
+**What happens during upgrade:**
+- All project logs and statistics will be lost (forwarded logs/statistics are not affected)
+- Services will be network-unavailable during the process (avg. 35 seconds but can take longer)
+- $10 project core fee will be charged upon upgrade
+- Free project resources will reset to Serious Core limits
+- Project IP addresses remain unchanged
+
+:::important
+If you encounter issues, **contact support immediately** and try running the process again.
+:::
+
+## Services
+
+Services encapsulate your containers and provide specific functionality within a project. A project can contain unlimited services, each with its own purpose.
+
+**Service types include:**
+- Runtimes, Linux Containers & Docker
+- Databases, Search Engines & Messages Brokers
+- Storages
+- *System services (needed for fully functioning project core)*
+
+**Management options:**
+- **Fully managed**: Zerops handles scaling, routing, and repairs automatically (Databases and Storages)
+- **Partially managed**: You maintain control over certain management aspects (Runtimes)
+
+Services within a project communicate via internal hostnames and can share environment variables for seamless integration.
+
+## Containers
+
+Containers are the most granular level of the Zerops architecture. Each service consists of one or more containers that work together to deliver functionality.
+
+**Container deployment:**
+- Single containers for simple applications
+- Multiple containers for High Availability (HA) mode (e.g. fully managed MariaDB service in HA mode uses 3 containers for the database cluster and 2 for proxies)
+
+**Container capabilities:**
+- Use predefined images or custom configurations
+- Can be exposed publicly via Zerops subdomains, custom domains, or public ports
+- Operate within service resource constraints with automatic scaling

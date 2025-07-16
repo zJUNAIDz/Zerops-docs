@@ -1,0 +1,17 @@
+---
+title: Gleam build process
+description: Learn more about build process of Gleam application
+---
+
+import { SetVar } from '@site/src/components/content/var';
+import BuildProcessContent from '@site/src/components/content/build-process.mdx';
+
+<SetVar name="servicePath" value="gleam" />
+<SetVar name="serviceDisplay" value="Gleam" />
+<SetVar name="defaultEnvironment" value="Erlang, Gleam, Rebar3 and Git" />
+<SetVar name="buildCommandExample" value={`buildCommands:
+  - gleam deps download --verbose
+  - gleam build`} />
+<SetVar name="codeLanguage" value="yaml" />
+
+<BuildProcessContent />
